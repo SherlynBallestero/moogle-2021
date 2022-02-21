@@ -25,7 +25,7 @@ namespace MoogleEngine
         /// (3)~ >Palabras a las que le corresponde calcular la cercania.
         ///Ademas nos aporta con una variable por referencia la devolucion de un query limpio(sin operadores)
         ///</summary>
-        public static (Symbol, string pharse) GetSymbol(string query)
+        public static (Symbol symbol, string pharse) GetSymbol(string query)
         {
             HelperMethods hM = new HelperMethods(this.path);
             string phrase = hM.TokenWords(query);
@@ -68,6 +68,8 @@ namespace MoogleEngine
             //para evitar que sean null si no hay palabras afectadas por ^ y !
             if(yes==" ")yes="notElements";
             if(no==" ")no="notElements";
+            if(Closeness[0].Item1 is null)Closeness.Add(("notElements","notElements"));
+            if(asterisks is null)asterisks.Add("notElements",-1);
 
             (string[] t1, string[] t2) banDocs = (hM.TokenWords(yes), hM.TokenWords(yes));
             Symbol answer = new Symbol(banDocs, asterisks, Closeness);
@@ -81,7 +83,8 @@ namespace MoogleEngine
         public static List<(int closeness, string document)> Closeness(Symbol symbol)
         {
             HelperMetods hM = new HelperMetods(this.path);
-            List<(string t1, string t2)> words = symbol.Closeness();
+            List<(string t1, string t2)> words = symbol.Closeness;
+            if(Closeness[0].t1=="notElements")return words;
             string[] files = Directory.GetFiles(this.path, "*.txt");
             //pasamos por cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 
             //en que se encuentran las palabras que nos interesa.

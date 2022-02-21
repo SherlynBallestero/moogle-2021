@@ -291,5 +291,25 @@ namespace MoogleEngine
                 }
             }
         }
+          ///<summary>
+        ///En este proceso se obtiene en un array cada palabra que existe en total de todos los documentos sin 
+        ///repeticion y asegurando que no hayan espacios en blanco o elementos null.
+        ///</summary>   
+        public string[] WordsInCollection()
+        {
+            string route = this.path;
+            string[] file = Directory.GetFiles(route, "*.txt");
+            string[] words = { " " };
+            string[] aux = { " " };
+            for (int i = 0; i < file.Length; i++)
+            {
+                string line = System.IO.File.ReadAllText(file[i]);
+                aux = TokenWords(line);
+                words = Concat(words, aux);
+
+            }
+            words = NullDelet(words);
+            return words;
+        }
     }
 }

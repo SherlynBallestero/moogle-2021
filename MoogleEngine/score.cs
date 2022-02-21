@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Collections;
+using System;
+
 namespace MoogleEngine
 {
 
@@ -59,93 +63,126 @@ namespace MoogleEngine
             return idf;
         }
         ///<summary>
-    ///calcula  la relevancia de una palabra especifica en cada documento de una colección
-    /// </summary>
-    public static double[] TFIDF(string route, string term)
-    {
-
-        string[] files = Directory.GetFiles(route, "*.txt");
-        double[] answer = new double[files.Length];
-
-        for (int i = 0; i < files.Length; i++)
+        ///calcula  la relevancia de una palabra especifica en cada documento de una colección
+        /// </summary>
+        public static double[] TFIDF(string route, string term, Symbol symbol)
         {
-            answer[i] = TF(term, files[i]) * IDF(term, route);
-        }
-        return answer;
-    }
-         public static double[] MV( string query,string route)
-    {
-        string[] file = Directory.GetFiles(route, "*.txt");
-        string[] words = { " " };
-        string[] aux = { " " };
-        string[] queryGuide = HelperMethods.SplitPhraseInWords(query);
-        double[] tfidf;
-        Vector[] vectors = new Vector[file.Length];
-        //para valores de coseno entre documentos y query
-        double[] cosin = new double[vectors.Length];
-        //indices para determinar a cual archivo se refiere una vez los ordene segun el score
-        double[] index = new double[vectors.Length];
+            Dictionary<string, int> asterisks = symbol.asterisks;
+            //para agregar importancia a las palabras que contienen asteriscos
+            int increase = 1;
+            if (asterisks.ContainsKey(term)) increase = increase * Math.Pow(2, asterisks[term]);
+            string[] files = Directory.GetFiles(route, "*.txt");
+            double[] answer = new double[files.Length];
 
-        //obteniendo un array con cada palabra que se encuentra entre todos los documentos sin repetir y sin comas o espacios en blancos y normalizados.
-        for (int i = 0; i < file.Length; i++)
-        {
-            StreamReader str = new StreamReader(file[i]);
-            string line = str.ReadLine();
-            while (line != null)
+            for (int i = 0; i < files.Length; i++)
             {
-                
-                aux =HelperMethods.TokenWords(line);
-                words = HelperMethods.Concat(words, aux);
-                line = str.ReadLine();
+                answer[i] = (TF(term, files[i]) * IDF(term, route)) * increase;
             }
+            return answer;
         }
-        words = HelperMethods.NullDelet(words);
-        double[] queryForVector = new double[words.Length];
-        double[,] mdt = new double[words.Length, file.Length];
-        double[] auxDouble = new double[words.Length];
-        double[] score;
-        double[] indexs;
-
-        for (int i = 0; i < words.Length; i++)
+        public static List<(double, string)> MV(string query, Dictionary<string, (string[] index1, List<int[]> index2)> positions, string route)
         {
-            //obteniendo los tfidf de cada palabra del documento para cada documento
-            tfidf = TFIDF(route, words[i]);
+            //procesando operadores...
+            operators operators = new operators(query, positions, route);
+            Symbol symbol = operators.GetSymbol.symbol;
+            string phrase = operators.GetSymbol.pharse;
+            //variables necesarias para obtener score...
+            HelperMethods hM = new HelperMethods(route);
+            string[] file = Directory.GetFiles(route, "*.txt");
+            // // string[] words = { " " };
+            // // string[] aux = { " " };
+            string[] queryGuide = HelperMethods.SplitPhraseInWords(phrase);
+            double[] tfidf;
+            Vector[] vectors = new Vector[file.Length];
+            //para valores de coseno entre documentos y query
+            double[] cosin = new double[vectors.Length];
+            //indices para determinar a cual archivo se refiere una vez los ordene segun el score
+            double[] index = new double[vectors.Length];
+            //variables para la devolucion.
+            string[] filesName = new string[file.Length];
+            List<(double, string)> answer = new List<(double, string)>();
+
+            // //obteniendo un array con cada palabra que se encuentra entre todos los documentos sin repetir y sin comas o espacios en blancos y normalizados.
+            // // for (int i = 0; i < file.Length; i++)
+            // // {
+            // //     StreamReader str = new StreamReader(file[i]);
+            // //     string line = str.ReadLine();
+            // //     while (line != null)
+            // //     {
+
+            // //         aux =hM.TokenWords(line);
+            // //         words = hM.Concat(words, aux);
+            // //         line = str.ReadLine();
+            // //     }
+            // // }
+            // // words = hM.NullDelet(words);
+            words = hM.WordsInCollection();
+            double[] queryForVector = new double[words.Length];
+            double[,] mdt = new double[words.Length, file.Length];
+            double[] auxDouble = new double[words.Length];
+            double[] score;
+            double[] indexs;
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                //obteniendo los tfidf de cada palabra del documento para cada documento
+                tfidf = TFIDF(route, words[i], symbol);
+                for (int j = 0; j < mdt.GetLength(1); j++)
+                {
+                    mdt[i, j] = tfidf[j];
+                }
+                //obteniendo el vector correspondiente al query
+                if (hM.FindInArray(queryGuide, words[i]))
+                {
+                    queryForVector[i] = hM.CountWordInArray(queryGuide, words[i]) * IDF(words[i], route);
+                }
+                else
+                {
+                    queryForVector[i] = 0;
+                }
+            }
+            Vector queryVector = new Vector(queryForVector);
+            //Obteniendo el vector correspondiente a cada documento
             for (int j = 0; j < mdt.GetLength(1); j++)
             {
-                    mdt[i, j] = tfidf[j];
+                for (int i = 0; i < mdt.GetLength(0); i++)
+                {
+                    auxDouble[i] = mdt[i, j];
+                }
+                vectors[j] = new Vector(auxDouble);
+                auxDouble = hM.fillWithZeros(auxDouble);
             }
-            //obteniendo el vector correspondiente al query
-            if (HelperMethods.FindInArray(queryGuide, words[i]))
+            //obteniendo los coseno de los angulos entre los vectores correspondiente a cada 
+            //documento y el vector correspondiente al query
+            for (int i = 0; i < vectors.Length; i++)
             {
-                queryForVector[i] = CountWordInArray(queryGuide, words[i]) * IDF(words[i], route);
+                cosin[i] = vectors[i].CosVector(queryVector);
             }
-            else
+            // score = hM.Ordenar(cosin, out indexs);
+            //haremos cero el score de los documentos vetados
+            list<string> BanDocuments = operators.BanDocuments(symbol);
+            if (BanDocuments[0] != "notElements")
             {
-                queryForVector[i] = 0;
+                for (int i = 0,j=0; i < cosin.Length; i++)
+                {
+                    while(j<BanDocuments.Count)
+                    {
+                        if(BanDocuments[i]!=file[index[i]])
+                        {
+                            //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
+                            answer.Add(cosin[i],file[index[i]]);
+                        }
+                    }
+                }
             }
+            //aumentar el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
+            
+
+
+
+
+            return score;
         }
-        Vector queryVector = new Vector(queryForVector);
-        //Obteniendo el vector correspondiente a cada documento
-        for (int j = 0; j < mdt.GetLength(1); j++)
-        {
-            for (int i = 0; i < mdt.GetLength(0); i++)
-            {
-                auxDouble[i] = mdt[i, j];
-            }
-            vectors[j] = new Vector(auxDouble);
-            auxDouble=fillWithZeros(auxDouble);
-        }
-        //obteniendo los coseno de los angulos entre los vectores correspondiente a cada 
-        //documento y el vector correspondiente al query
-        for (int i = 0; i < vectors.Length; i++)
-        {
-            cosin[i] = vectors[i].CosVector(queryVector);
-        }
-        score = HelperMethods.Ordenar(cosin, out indexs);
-        string[] filesName = new string[file.Length];
-        
-        return score;
-    }
 
     }
 }
