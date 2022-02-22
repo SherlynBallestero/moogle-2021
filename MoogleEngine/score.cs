@@ -89,8 +89,6 @@ namespace MoogleEngine
             //variables necesarias para obtener score...
             HelperMethods hM = new HelperMethods(route);
             string[] file = Directory.GetFiles(route, "*.txt");
-            // // string[] words = { " " };
-            // // string[] aux = { " " };
             string[] queryGuide = HelperMethods.SplitPhraseInWords(phrase);
             double[] tfidf;
             Vector[] vectors = new Vector[file.Length];
@@ -101,21 +99,8 @@ namespace MoogleEngine
             //variables para la devolucion.
             string[] filesName = new string[file.Length];
             List<(double, string)> answer = new List<(double, string)>();
-
-            // //obteniendo un array con cada palabra que se encuentra entre todos los documentos sin repetir y sin comas o espacios en blancos y normalizados.
-            // // for (int i = 0; i < file.Length; i++)
-            // // {
-            // //     StreamReader str = new StreamReader(file[i]);
-            // //     string line = str.ReadLine();
-            // //     while (line != null)
-            // //     {
-
-            // //         aux =hM.TokenWords(line);
-            // //         words = hM.Concat(words, aux);
-            // //         line = str.ReadLine();
-            // //     }
-            // // }
-            // // words = hM.NullDelet(words);
+            //lista que contiene las distancias entre las distancias entre las palabras para el operados ~
+            List<(int dist, string document)> Closeness = operators.Closeness(symbol);
             words = hM.WordsInCollection();
             double[] queryForVector = new double[words.Length];
             double[,] mdt = new double[words.Length, file.Length];
@@ -163,25 +148,40 @@ namespace MoogleEngine
             list<string> BanDocuments = operators.BanDocuments(symbol);
             if (BanDocuments[0] != "notElements")
             {
-                for (int i = 0,j=0; i < cosin.Length; i++)
+                for (int i = 0, j = 0; i < cosin.Length; i++)
                 {
-                    while(j<BanDocuments.Count)
+                    while (j < BanDocuments.Count)
                     {
-                        if(BanDocuments[i]!=file[index[i]])
+                        if (BanDocuments[i] != file[index[i]])
                         {
                             //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
-                            answer.Add(cosin[i],file[index[i]]);
+                            answer.Add(cosin[i], file[index[i]]);
                         }
                     }
                 }
             }
             //aumentar el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
-            
+            //primero se verifica si hay palabras afectadas por este operador
+            //se aumenta el score en un  20% de los 7 documentos con mejores resultados cercania dadas las condiciones del operador.
+            double increment = 5 / 10;
+            if (Closeness[0].document != "notElements")
+            {
+                int indexAux = 0;
+                while (indexAux <= 7)
+                {
+                    for (int i = 0; i < answer.Count; i++)
+                    {
+                        if (answer[i].Item2 == Closeness[indexAux].document)
+                        {
+                            answer[i].Item1 = answer[i].Item1 * increment;
+                        }
+                    }
+                }
+            }
 
 
+            return answer;
 
-
-            return score;
         }
 
     }

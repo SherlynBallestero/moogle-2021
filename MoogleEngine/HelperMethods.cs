@@ -295,7 +295,7 @@ namespace MoogleEngine
         ///En este proceso se obtiene en un array cada palabra que existe en total de todos los documentos sin 
         ///repeticion y asegurando que no hayan espacios en blanco o elementos null.
         ///</summary>   
-        public string[] WordsInCollection()
+        public static string[] WordsInCollection()
         {
             string route = this.path;
             string[] file = Directory.GetFiles(route, "*.txt");
@@ -310,6 +310,83 @@ namespace MoogleEngine
             }
             words = NullDelet(words);
             return words;
+        }
+        ///<summary>
+        ///Metodo margesort para ordenar list<int,string>
+        ///</summary> 
+        public static void MargeSortToList(List<(int,string)> list)
+        {
+            MargeSortToList(list,0,list.Count-1);
+        }
+        public static void MargeSortToList(List<(int,string)> list,int start, int end)
+        {
+            //condicion de parada
+            if(start==end)return;
+            //buscando el medio de la lista de elementos
+            int mit=(start+end)/2;
+            //ordenar1ra mitad y luego la segunda
+            MargeSortToList(list,start,mit);
+            MargeSortToList(list,mit+1,end);
+            List<(int,string)>aux=Marge(list,start,mit,mit+1,end);
+            //copiar los elementos de aux a x
+            CopyListToList(list,0,aux,start,aux.Count);
+        } 
+        public static void Marge(List<(int,string)> list,int start1,int end1,int start2,int end2)
+        {
+            int a=start1;
+            int b=start2;
+            List<(int,string)> answer=new List<(int, string)>();
+            int t=(end1-start1)+(end2-start2);
+            for(int i=0;i<t;i++)
+            {
+                if(b!=list.Count)
+                {
+                    if(a>end1 && b<=end2)
+                    {
+                        answer.Add(list[b]);
+                        b++;
+                    }
+                    if(b>end2 && a<=end1)
+                    {
+                        answer.Add(list[a]);
+                        a++;
+                    }
+                          if(b<=end2 && a<=end1)
+                    {
+                        if(list[a]>+list[b])
+                        {
+                            answer.Add(list[a]);
+                            a++;
+                        }
+                        else
+                        {
+                            answer.Add(list[b]);
+                            b++;
+                        }
+                    }
+
+                }
+                else
+                {
+                    if(a<=end1)
+                    {
+                        answer.Add(list[a]);
+                        a++;
+                    }
+                }
+            }
+            return answer;
+        }
+        public void CopyListToList(  List<(int,string)>list, List<(int,string)>aux)
+        {
+            List<(int,string)>answer=new List<(int, string)>();
+            for(int i=0;i<aux.Count;i++)
+            {
+                answer[i]=aux[i];
+            }
+            list=new List<(int, string)>();
+            list=answer;
+            return list;
         }
     }
 }

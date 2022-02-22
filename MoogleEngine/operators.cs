@@ -84,12 +84,16 @@ namespace MoogleEngine
         {
             HelperMetods hM = new HelperMetods(this.path);
             List<(string t1, string t2)> words = symbol.Closeness;
-            if(Closeness[0].t1=="notElements")return words;
+           List<(int, string)> distanceForDocument = new List<(int,string)>();
+            if(Closeness[0].t1=="notElements")
+            {
+                distanceForDocument.Add((0,"notElements"));
+            }
             string[] files = Directory.GetFiles(this.path, "*.txt");
             //pasamos por cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 
             //en que se encuentran las palabras que nos interesa.
             int distance = 0;
-            List<(int, string)> distanceForDocument = new List<int>();
+            
             for (int i = 0; i < words.Count; i++)
             {
                 foreach (string file in files)
@@ -102,10 +106,11 @@ namespace MoogleEngine
                         for (int j = i + 1; j < aux2.Length; j++)
                         {
                             distance = Math.Abs(aux2[j] - aux1[i]);
-                            min = Math.Min(distancia, min);
+                            min = Math.Min(distance, min);
                         }
                     }
                     distanceForDocument.Add(min, file[i]);
+                    //margesort para listas y devolver distance ordenado de mayyor a menor
                     min = int.MaxValue;
                 }
             }

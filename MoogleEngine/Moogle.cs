@@ -3,6 +3,11 @@
 
 public static class Moogle
 {
+        public static void Start()
+    {
+        
+    }
+    //metodo para devolver los item de busqueda
     public static SearchResult Query(string query) {
         // Modifique este método para responder a la búsqueda
 
@@ -14,4 +19,5 @@ public static class Moogle
 
         return new SearchResult(items, query);
     }
+
 }
