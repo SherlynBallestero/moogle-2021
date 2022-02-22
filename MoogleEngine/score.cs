@@ -1,18 +1,17 @@
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using System.Text.RegularExpressions;
 
 namespace MoogleEngine
 {
 
     public class score
     {
-        public string path;
-        public WordInformation(string path)
+  
+        public score()
         {
-            if (path == null)
-                throw new ArgumentException("The imput path can't be null");
-            this.path = path;
+
         }
 
         ///<summary>
@@ -30,7 +29,7 @@ namespace MoogleEngine
             string[] words;
             while (line != null)
             {
-                words = SplitPhraseInWords(line);
+                words = HelperMethods.SplitPhraseInWords(line);
                 string w = "";
 
                 foreach (string word in words)
@@ -56,7 +55,7 @@ namespace MoogleEngine
             double FoundT = 1;
             for (int i = 0; i < NomberOfDocuments; i++)
             {
-                if (Find(term, files[i])) FoundT++;
+                if (HelperMethods.Find(term, files[i])) FoundT++;
             }
             //calculando frecuencia inversa de documentos
             idf = Math.Log(NomberOfDocuments / FoundT);
@@ -65,31 +64,31 @@ namespace MoogleEngine
         ///<summary>
         ///calcula  la relevancia de una palabra especifica en cada documento de una colección
         /// </summary>
-        public static double[] TFIDF(string route, string term, Symbol symbol)
+        public  static double[] TFIDF(string route, string term, Symbol symbol)
         {
+            score scr=new score();
             Dictionary<string, int> asterisks = symbol.asterisks;
             //para agregar importancia a las palabras que contienen asteriscos
-            int increase = 1;
-            if (asterisks.ContainsKey(term)) increase = increase * Math.Pow(2, asterisks[term]);
+            double increase = 1;
+            if (asterisks.ContainsKey(term)) increase = Math.Pow(2, asterisks[term]);
             string[] files = Directory.GetFiles(route, "*.txt");
             double[] answer = new double[files.Length];
 
             for (int i = 0; i < files.Length; i++)
             {
-                answer[i] = (TF(term, files[i]) * IDF(term, route)) * increase;
+                answer[i] = (scr.TF(term, files[i]) * IDF(term, route)) * increase;
             }
             return answer;
         }
-        public static List<(double, string)> MV(string query, Dictionary<string, (string[] index1, List<int[]> index2)> positions, string route)
-        {
-            //procesando operadores...
-            operators operators = new operators(query, positions, route);
-            Symbol symbol = operators.GetSymbol.symbol;
-            string phrase = operators.GetSymbol.pharse;
+         //file es la path a las files
+         //closeness lista con distanciasmejores por documento
+         //queryguide es el query hevho array de string limpio
+         //diccionario de las posiciones y luego el path
+         //mejoras necesarias: trabajar con los tf guardados en diccionary y si estoy pa eso guardar los tfidf por 
+         //palabra y en el de tf solo poner la palabra con mas frecuencia por documento 
+        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, (string[] index1, List<int[]> index2)> positions, string route)
+        {  
             //variables necesarias para obtener score...
-            HelperMethods hM = new HelperMethods(route);
-            string[] file = Directory.GetFiles(route, "*.txt");
-            string[] queryGuide = HelperMethods.SplitPhraseInWords(phrase);
             double[] tfidf;
             Vector[] vectors = new Vector[file.Length];
             //para valores de coseno entre documentos y query
@@ -99,14 +98,14 @@ namespace MoogleEngine
             //variables para la devolucion.
             string[] filesName = new string[file.Length];
             List<(double, string)> answer = new List<(double, string)>();
-            //lista que contiene las distancias entre las distancias entre las palabras para el operados ~
-            List<(int dist, string document)> Closeness = operators.Closeness(symbol);
-            words = hM.WordsInCollection();
+            //reformar esto....
+            string[] words = HelperMethods.WordsInCollection(route);
             double[] queryForVector = new double[words.Length];
             double[,] mdt = new double[words.Length, file.Length];
             double[] auxDouble = new double[words.Length];
-            double[] score;
-            double[] indexs;
+        
+            //...eliminar... double[] score;
+            //...eliminar... int[] indexs;
 
             for (int i = 0; i < words.Length; i++)
             {
@@ -117,9 +116,10 @@ namespace MoogleEngine
                     mdt[i, j] = tfidf[j];
                 }
                 //obteniendo el vector correspondiente al query
-                if (hM.FindInArray(queryGuide, words[i]))
+                if (HelperMethods.FindInArray(queryGuide, words[i]))
                 {
-                    queryForVector[i] = hM.CountWordInArray(queryGuide, words[i]) * IDF(words[i], route);
+                    queryForVector[i] = 
+                    HelperMethods.CountWordInArray(queryGuide, words[i]) * IDF(words[i], route);
                 }
                 else
                 {
@@ -135,7 +135,7 @@ namespace MoogleEngine
                     auxDouble[i] = mdt[i, j];
                 }
                 vectors[j] = new Vector(auxDouble);
-                auxDouble = hM.fillWithZeros(auxDouble);
+                auxDouble = HelperMethods.fillWithZeros(auxDouble);
             }
             //obteniendo los coseno de los angulos entre los vectores correspondiente a cada 
             //documento y el vector correspondiente al query
@@ -145,18 +145,19 @@ namespace MoogleEngine
             }
             // score = hM.Ordenar(cosin, out indexs);
             //haremos cero el score de los documentos vetados
-            list<string> BanDocuments = operators.BanDocuments(symbol);
+            List<string> BanDocuments = operators.BanDocuments(symbol,route);
             if (BanDocuments[0] != "notElements")
             {
                 for (int i = 0, j = 0; i < cosin.Length; i++)
                 {
                     while (j < BanDocuments.Count)
                     {
-                        if (BanDocuments[i] != file[index[i]])
+                        if (BanDocuments[j] != file[i])
                         {
                             //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
-                            answer.Add(cosin[i], file[index[i]]);
+                            answer.Add((cosin[i], file[i]));
                         }
+                        j++;
                     }
                 }
             }
@@ -173,7 +174,7 @@ namespace MoogleEngine
                     {
                         if (answer[i].Item2 == Closeness[indexAux].document)
                         {
-                            answer[i].Item1 = answer[i].Item1 * increment;
+                            answer[i]= (answer[i].Item1 * increment,answer[i].Item2);
                         }
                     }
                 }

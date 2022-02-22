@@ -210,9 +210,9 @@ namespace MoogleEngine
         ///<summary>
         ///Devuelve las posiciones de un termino en un documento
         ///</summary>
-        public static int[] PositionInDocument(string word, string document)
+        public static int[] PositionInDocument(string word, string document,string route)
         {
-            score scr=new score(path);
+            score scr=new score();
             string[] allWordsInDocument = WordsInDocuments(document);
             int[] ret = { -1 };
             //if (TF(word, document) == 0) return ret;
@@ -233,7 +233,7 @@ namespace MoogleEngine
             int maxlarge = 40;
             int minlarge=15;
             string[] queryWords = query.Split();
-            int[] aux;
+            int[] aux=new int[2];
             //List<int> aux=new List<int>();
             string[] documents = dictionary[queryWords[0]].t1;
             int index = 0;
@@ -286,13 +286,13 @@ namespace MoogleEngine
         ///</summary>        
         public (Dictionary<string, (string[], List<double>)> t1, Dictionary<string, (string[], List<int[]>)> t2) FillDictionary()
         {
-            score score=new score(path);
+            score score=new score();
             string[] file = Directory.GetFiles(this.path, "*.txt");
             string[] words = { " " };
             words = WordsInCollection();
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento el tf de esa palabra en
             // ese documento.
-            Dictionary<string, (string[], List<double>)> wordsTf = Dictionary<string, (string[], List<double>)>();
+            Dictionary<string, (string[], List<double>)> wordsTf = new Dictionary<string, (string[], List<double>)>();
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento las posiciones en que
             // encontramos dicha palabra.
             Dictionary<string, (string[], List<int[]>)> wordInf = new Dictionary<string, (string[], List<int[]>)>();
@@ -304,10 +304,10 @@ namespace MoogleEngine
             {
                 foreach (string f in file)
                 {
-                    tfAux.Add(scr.TF(words[i], f));
-                    Positions.Add(PositionInDocument(words[i], f));
+                    tfAux.Add(score.TF(words[i], f));
+                    Positions.Add(PositionInDocument(words[i], f,this.path));
                 }
-                wordstf.Add(words[i], (file, tfAux));
+                wordsTf.Add(words[i], (file, tfAux));
                 wordInf.Add(words[i], (file, Positions));
                 tfAux = new List<double>();
                 Positions = new List<int[]>();
@@ -327,7 +327,7 @@ namespace MoogleEngine
         ///</summary>
         public static int[] ConcatInt(int[] a,int[] b)
         {
-            int[] answer=new int[a.Length+b.Length];
+            int[] concated=new int[a.Length+b.Length];
             int[]c={-1};
             //creo que no debe haber ningun problema con eso pq no tiene pq llegar el caso en que aux sea {-1} dado que se le pasan 
             //arrays de int con las posiciones en que se encuentra una palabra dada para cierto doc,hay que ver cuando esa palabra no se encuentra en el documento que es lo q me da en las posiciones,en el caso de que obtenga -1 habria que ver no vaya a ser que mande a indexar en el documento en menos 1
@@ -356,6 +356,7 @@ namespace MoogleEngine
                     j++;
                 }
             }
+            return concated;
         }
         ///<summary>
         ///Metodo para determinar si dado un intervalo [a,b] referentes a posicion a y
@@ -398,7 +399,7 @@ namespace MoogleEngine
                 }
                 if(count>=lowerEnd)
                 {
-                    answer=line[i];
+                    answer+=line[i];
                 }
                 if(count==topEnd+minlarge)
                 {

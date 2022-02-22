@@ -1,4 +1,4 @@
-using System.Collections.Generic.Dictionary;
+using System.Collections.Generic;
 namespace MoogleEngine
 {
     public class Symbol
@@ -15,19 +15,8 @@ namespace MoogleEngine
             this.asterisks=asterisks;
             this.Closeness=Closeness;
         }
-        //propiedades
-        public static(string[] yes,string[] no) banDocs
-        {
-            get { return this.banDocs;}
-        }
-          public Dictionary<string, int> asterisks
-        {
-            get { return this.asterisks;}
-        }
-         public List<(string,string)> Closeness
-        {
-            get { return this.Closeness;}
-        }
+       
+        
       
 
     }

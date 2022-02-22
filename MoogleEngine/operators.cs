@@ -4,18 +4,11 @@ namespace MoogleEngine
 {
     public class operators
     {
-        public string query;
-        //direccion hasta la carpeta que contiene la coleccion de documentos
-        public string path;
-        //this.positions dictionary que tiene por palabras string[](que almacena los documentos en el orden en que te 
-        //da en los mismos indices de una lista las posiciones en que se encuentra dicha palabra en el correspondiente documento)
-        public Dictionary<string, (string[] index1, List<int[]> index2)> positions;
-        //constructor...
-        public operators(string query, Dictionary<string, (string[], List<int[]>)> positions, string path)
+
+       //constructor...
+        public operators()
         {
-            this.query = query;
-            this.positions = positions;
-            this.path = path;
+            
         }
         //methodos...
         ///<summary>
@@ -25,12 +18,12 @@ namespace MoogleEngine
         /// (3)~ >Palabras a las que le corresponde calcular la cercania.
         ///Ademas nos aporta con una variable por referencia la devolucion de un query limpio(sin operadores)
         ///</summary>
-        public static (Symbol symbol, string pharse) GetSymbol(string query)
+        public static (Symbol symbol,string[] pharse) GetSymbol(string query,string route)
         {
-            HelperMethods hM = new HelperMethods(this.path);
-            string phrase = hM.TokenWords(query);
+            string[] phrase = HelperMethods.TokenWords(query);
             string[] words = query.Split(' ');
-            int count = 0;
+            //para saber a cual palabra ya sin los operadores corresponde la palabra del query que se analiza
+            int count = -1;
             char[] Symbol = { '!', '^', '*', '~' };
             string yes = " ";
             string no = " ";
@@ -55,7 +48,7 @@ namespace MoogleEngine
                     {
                         //implementar cuenta asteriscos
                         //count= CountAsterisks(word);
-                        asterisks.Add(word, CountAsterisks(word));
+                        asterisks.Add(phrase[count], CountAsterisks(word));
 
                     }
                 }
@@ -71,25 +64,25 @@ namespace MoogleEngine
             if(Closeness[0].Item1 is null)Closeness.Add(("notElements","notElements"));
             if(asterisks is null)asterisks.Add("notElements",-1);
 
-            (string[] t1, string[] t2) banDocs = (hM.TokenWords(yes), hM.TokenWords(yes));
+            (string[] t1, string[] t2) banDocs = (HelperMethods.TokenWords(yes), HelperMethods.TokenWords(yes));
             Symbol answer = new Symbol(banDocs, asterisks, Closeness);
-            return (answer, phrase);
+            return (answer,phrase);
         }
 
         ///<summary>
         ///metodo para determinar las cercanias entre dos palabras dada sus posiciones(para el operador "~")
         ///retorna las distancias mas cortas por documento a partir de las palabras que se le da como imput.
         ///</summary>
-        public static List<(int closeness, string document)> Closeness(Symbol symbol)
+        public static List<(int closeness, string document)> Closeness(Symbol symbol,string route,  Dictionary<string, (string[] index1, List<int[]> index2)> positions)
         {
-            HelperMetods hM = new HelperMetods(this.path);
+           //// HelperMetods hM = new HelperMetods(this.path);
             List<(string t1, string t2)> words = symbol.Closeness;
            List<(int, string)> distanceForDocument = new List<(int,string)>();
-            if(Closeness[0].t1=="notElements")
+            if(words[0].t1=="notElements")
             {
                 distanceForDocument.Add((0,"notElements"));
             }
-            string[] files = Directory.GetFiles(this.path, "*.txt");
+            string[] files = Directory.GetFiles(route, "*.txt");
             //pasamos por cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 
             //en que se encuentran las palabras que nos interesa.
             int distance = 0;
@@ -98,32 +91,35 @@ namespace MoogleEngine
             {
                 foreach (string file in files)
                 {
-                    int[] aux1 = this.position[words[i].t1].index2;
-                    int[] aux2 = this.position[words[i].t2].index2;
+                    int[] aux1 = positions[words[i].t1].index2[i];
+                    int[] aux2 = positions[words[i].t2].index2[i];
                     int min = int.MaxValue;
-                    for (int i = 0; i < aux1.Length; i++)
+                    for (int j = 0; j < aux1.Length; j++)
                     {
-                        for (int j = i + 1; j < aux2.Length; j++)
+                        for (int k = i + 1; k < aux2.Length; k++)
                         {
-                            distance = Math.Abs(aux2[j] - aux1[i]);
+                            distance = Math.Abs(aux2[k] - aux1[j]);
                             min = Math.Min(distance, min);
                         }
                     }
-                    distanceForDocument.Add(min, file[i]);
-                    //margesort para listas y devolver distance ordenado de mayyor a menor
+                    distanceForDocument.Add((min, file));
+                    
                     min = int.MaxValue;
                 }
             }
+            //margesort para listas y devolver distance ordenado de mayyor a menor
+            HelperMethods.MargeSortToList(distanceForDocument);
+
             return distanceForDocument;
         }
         ///<summary>
         ///Metodo para obtener los documentos que se vetaran,asi poder satisfascer las condiciones de los operadores ! y ^
         ///</summary>
-        public static list<string> BanDocuments(Symbol symbol)
+        public static List<string> BanDocuments(Symbol symbol,string route)
         {
             List<string> answer=new List<string>();
-            HelperMetods hM = new HelperMetods(this.path);
-            string[] files = Directory.GetFiles(this.path, "*.txt");
+           //// HelperMetods hM = new HelperMetods(this.path);
+            string[] files = Directory.GetFiles(route, "*.txt");
             bool[] marks = new bool[files.Length];
             //en yes encontramos las palabras que deben aparecer en el documento para no ser vetado y rn no las que no deben
             //aparecer para no ser vetados.
@@ -144,14 +140,14 @@ namespace MoogleEngine
                     {
                         if (y < yes.Length)
                         {
-                            if (!hM.Find(yes[y], file))
+                            if (!HelperMethods.Find(yes[y], files[i]))
                             {
                                 indexYes = false;
                             }
                         }
                         if (n < no.Length)
                         {
-                            if (hM.Find(no[n], file))
+                            if (HelperMethods.Find(no[n], files[i]))
                             {
                                 indexNo = false;
                             }
@@ -168,7 +164,7 @@ namespace MoogleEngine
                 {
                     for (int i = 0; i < files.Length; i++)
                     {
-                        if (hM.Find(no[n], file))
+                        if (HelperMethods.Find(no[n], files[i]))
                             marks[i]=false;
                             
                     }
@@ -181,7 +177,7 @@ namespace MoogleEngine
                 {
                     for (int i = 0; i < files.Length; i++)
                     {
-                        if (!hM.Find(yes[y], file))
+                        if (!HelperMethods.Find(yes[y], files[i]))
                             marks[i]=false;
                             
                     }
