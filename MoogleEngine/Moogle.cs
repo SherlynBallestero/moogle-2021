@@ -2,11 +2,11 @@
 
 
 public static class Moogle
-{
-        public static void Start(string query)
-    {
+{  
+    //metodo para devolver los item de busqueda
+    public static SearchResult Query(string query) {
         //ruta de acceso a la coleccion de documentos
-        string path=Directory.GetCurrentDirectory()+"../Content/";
+         string path=Directory.GetCurrentDirectory()+"\\..\\Content\\";
         //nombre de los archivos en el path
         string[] filesNames=Directory.GetFileSystemEntries(path);
         //obtener direcciones hacia los archivos contenidos en la coleccion
@@ -30,21 +30,23 @@ public static class Moogle
         List<(int closeness, string document)> DistanceInWordsWhithOperator=operators.Closeness(symbol,path,DictionaryForPositions);
         //lista de score por nombre de documento ordenados de mayor a menor
         List<(double, string)> scores=score.MV(DistanceInWordsWhithOperator,filesPath,newQuery,query,symbol,DictionaryForPositions,path); 
-        
-
-
-
-    }
-    //metodo para devolver los item de busqueda
-    public static SearchResult Query(string query) {
+        //cacho de codigo por documento
+        string[] snippet=WordInformation.snippet(newQuery,DictionaryForPositions,filesPath,symbol);
         // Modifique este método para responder a la búsqueda
 
-        SearchItem[] items = new SearchItem[3] {
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.9f),
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.5f),
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.1f),
-        };
+        // SearchItem[] items = new SearchItem[3] {
+        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.9f),
+        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.5f),
+        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.1f),
+        // };
 
+        
+         SearchItem[] items = new SearchItem[10]; 
+        for(int i=0;i<10;i++)
+        {
+           SearchItem aux=new SearchItem(scores[i].Item2,"algo",Convert.ToSingle( scores[i].Item1));
+           items[i]=aux;
+        }
         return new SearchResult(items, query);
     }
 

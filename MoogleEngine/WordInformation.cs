@@ -144,23 +144,26 @@ namespace MoogleEngine
             bool change = false;
             foreach (string word in words)
             {
-                for (int i = 0; i < word.Length; i++)
-                {
-                    if (char.IsLetter(word[i]) || char.IsNumber(word[i]))
-                    {
-                        w += word[i];
-                    }
-                    else
-                    {
-                        //change se hace false cuando hubo un caso en q se encontro con un char que no es letra
-                        change = true;
-                    }
-                }
-                w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-                newWords[index] = w;
-                w = "";
-                index++;
-                change = false;
+                // for (int i = 0; i < word.Length; i++)
+                // {
+                //     if (char.IsLetter(word[i]) || char.IsNumber(word[i]))
+                //     {
+                //         w += word[i];
+                //     }
+                //     else
+                //     {
+                //         //change se hace false cuando hubo un caso en q se encontro con un char que no es letra
+                //         change = true;
+                //     }
+                // }
+                // w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
+                // newWords[index] = w;
+                // w = "";
+                // index++;
+                // change = false;
+                w=word;
+                  w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
+                  newWords[index] = w;
             }
             return newWords;
         }
@@ -228,11 +231,14 @@ namespace MoogleEngine
             }
             return answer;
         }
-        public static string snippet(string query, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
+        ///<summary>
+        ///Devuelve un cacho de codigo de determinado documento
+        ///</summary>
+        public static string snippetForASpecificDocument(string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
         {//**asegurarme de pasar el query limpio**
             int maxlarge = 40;
             int minlarge = 15;
-            string[] queryWords = query.Split();
+            //string[] queryWords = query.Split();
             int[] aux = new int[2];
             string[] text = File.ReadAllText(pathToDocument).Split(' ');
 
@@ -367,6 +373,18 @@ namespace MoogleEngine
                 {
                     answer += text[i] + " ";
                 }
+            }
+            return answer;
+        }
+        ///<summary>
+        ///Devuelve un cacho de codigo para cada documento
+        ///</summary>
+        public static string[] snippet(string[] query, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string[] files, Symbol symbol)
+        {
+            string[] answer=new string[files.Length];
+            for(int i=0;i<files.Length;i++)
+            {
+                answer[i]=snippetForASpecificDocument(query,dictionary,files[i],symbol);
             }
             return answer;
         }
