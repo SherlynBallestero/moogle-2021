@@ -192,6 +192,16 @@ namespace MoogleEngine
             if(answer is null)answer.Add("notElements");
             return answer;
         }
+        public static int CountAsterisks(string word)
+        {
+            int count=0;
+            for(int i=0;i<word.Length;i++)
+            {
+                if(word[i]=='*')count++;
+                else break;
+            }
+            return count;
+        }
 
     }
 }
