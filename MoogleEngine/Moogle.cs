@@ -11,19 +11,29 @@ public static class Moogle
         string[] filesNames=Directory.GetFileSystemEntries(path);
         //obtener direcciones hacia los archivos contenidos en la coleccion
         string[] filesPath=Directory.GetFiles(path,"*txt");
-        //implementar lo de los sinonimos,que dios me ayude y no se me olvide que ouse esto aqui
+        
         
         //instancia de la clase wordInfp para obtener los diccionarios
         WordInformation wordInfo=new WordInformation(path);
         //Obteniendo Dictionary con todas las palabras de la coleccion de documentos y sus 
         //respectivas posiciones por documento
         Dictionary<string, (string[], List<int[]>)> DictionaryForPositions=wordInfo.FillDictionary().t2;
+        //guardar diccionary positions
+        DictionaryWork.SaveDictionaryPosition(DictionaryForPositions);
+        //recoger diccionario de posiciones
+        //Dictionary<string, (string[], List<int[]>)> DictionaryForPositions=DictionaryWork.TekeDictionaryPosition();
+
+
         //Obteniendo Dictionary con todas las palabras de la coleccion y sus 
         // frecuencias por documento
-       //// Dictionary<string, (string[], List<double>)> DictionaryForTF=wordInfo.FillDictionary().t1;
+       //////// Dictionary<string, (string[], List<double>)> DictionaryForTF=wordInfo.FillDictionary().t1;
+       //dictionary de sinonimos
+        Dictionary<string,List<string[]>> sinonymous=DictionaryWork.TekeDictionarySyn();
+       
         //hallando una sugerencia para el query.
         Suggestion sgt=new Suggestion(query);
         string suggestion=sgt.suggestionForQuery(DictionaryForPositions);
+
         //se revisa si contenemos al query entre nuestros documentos
         string[] pharse=HelperMethods.TokenWords(query);
        bool contain=false;
@@ -39,9 +49,10 @@ public static class Moogle
       new SearchItem("Not Found", "Not Found", 0.9f)};
       
       return new SearchResult(items1, suggestion);
-         //retornar sugerencia o algo aun no se
+       
         }
         //***cuando si encontramos al query entre nuestros documentos...***
+          
            //...operadores...
         //obteniendo symbol para trabajar con los operadores.
         Symbol symbol=operators.GetSymbol(query,path).symbol;

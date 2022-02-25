@@ -116,6 +116,8 @@ namespace MoogleEngine
             Suggestion sgt=new Suggestion(this.query);
             string[] words=query.Split(' ');
             string answer="";
+            double max=-1;
+            string aux="";
             foreach (string word in words)
             {
                 //vamos a buscar palabras similares solo cuando no se encuentra alguna de las palabras del query en 
@@ -125,12 +127,14 @@ namespace MoogleEngine
                     foreach (string key in dictionary.Keys)
                     {
                         //nos quedamos con la primera palabra similar que encontramos.
-                        if ((SimilarityInWords(word, key) <1 / 2))
+                        if ((SimilarityInWords(word, key) >max))
                         {
-                            answer += key + " ";
-                            break;
+                            aux= key;
+                            max=SimilarityInWords(word, key);
                         }
                     }
+                    answer+=aux+" ";
+                    max=-1;
                 }
                 else
                 {
