@@ -19,36 +19,23 @@ namespace MoogleEngine
         ///</summary>
         public double TF(string t, string pathToFolder)
         {
-            t = Regex.Replace(t.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-
-            //vamos a llevar el termino a minuscula para encontrarlo siempre que aparezca ya sea en minuscula o en mayuscula
-            t = t.ToLower();
-            StreamReader str = new StreamReader(pathToFolder);
             double count = 0;
-            string line = str.ReadLine();
-            string[] words;
-            while (line != null)
-            {
-                words = HelperMethods.SplitPhraseInWords(line);
-                string w = "";
-
+           
+            string[] words=File.ReadAllText(pathToFolder).Split(' ');
                 foreach (string word in words)
                 {
-                    w = Regex.Replace(word.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-
-                    if (w == t) count++;
+                      if (word == t) count++;
                 }
-                line = str.ReadLine();
-            }
+
             return count;
         }
         ///<summary>
         ///retorna Frecuencia Inversa de Documento, medida para conocer que tan raro es el término t en una colección de documentos dada.
         /// </summary> 
         /// <param name="route">Ruta hacia la carpeta en que se encuentran los archivos entre los que buscar.</param>       
-        public static double IDF(string term, string route)
+        public static double IDF(string term,string[] files, string route)
         {
-            string[] files = Directory.GetFiles(route, "*.txt");
+             
             double NomberOfDocuments = files.Length;
             double idf = 0;
             //inicializar FoundT en 1 por si no se encuentra t en ningun documento no se haga división por 0
@@ -64,19 +51,19 @@ namespace MoogleEngine
         ///<summary>
         ///calcula  la relevancia de una palabra especifica en cada documento de una colección
         /// </summary>
-        public  static double[] TFIDF(string route, string term, Symbol symbol)
+        public  static double[] TFIDF(string[] files,string route , string term, Symbol symbol)
         {
             score scr=new score();
             Dictionary<string, int> asterisks = symbol.asterisks;
             //para agregar importancia a las palabras que contienen asteriscos
             double increase = 1;
             if (asterisks.ContainsKey(term)) increase = Math.Pow(2, asterisks[term]);
-            string[] files = Directory.GetFiles(route, "*.txt");
+             
             double[] answer = new double[files.Length];
 
             for (int i = 0; i < files.Length; i++)
             {
-                answer[i] = (scr.TF(term, files[i]) * IDF(term, route)) * increase;
+                answer[i] = (scr.TF(term, files[i]) * IDF(term,files, route)) * increase;
             }
             return answer;
         }
@@ -110,7 +97,7 @@ namespace MoogleEngine
             for (int i = 0; i < words.Length; i++)
             {
                 //obteniendo los tfidf de cada palabra del documento para cada documento
-                tfidf = TFIDF(route, words[i], symbol);
+                tfidf = TFIDF(file,route, words[i], symbol);
                 for (int j = 0; j < mdt.GetLength(1); j++)
                 {
                     mdt[i, j] = tfidf[j];
@@ -119,7 +106,7 @@ namespace MoogleEngine
                 if (HelperMethods.FindInArray(queryGuide, words[i]))
                 {
                     queryForVector[i] = 
-                    HelperMethods.CountWordInArray(queryGuide, words[i]) * IDF(words[i], route);
+                    HelperMethods.CountWordInArray(queryGuide, words[i]) * IDF(words[i],file, route);
                 }
                 else
                 {
@@ -146,7 +133,7 @@ namespace MoogleEngine
             // score = hM.Ordenar(cosin, out indexs);
             //haremos cero el score de los documentos vetados
             List<string> BanDocuments = operators.BanDocuments(symbol,route);
-            if (BanDocuments[0] != "notElements")
+            if (BanDocuments.Count!=0)
             {
                 for (int i = 0, j = 0; i < cosin.Length; i++)
                 {
@@ -159,6 +146,13 @@ namespace MoogleEngine
                         }
                         j++;
                     }
+                }
+            }
+            else
+            {
+                for (int i = 0, j = 0; i < cosin.Length; i++)
+                {
+                   answer.Add((cosin[i], file[i]));
                 }
             }
             //aumentar el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
@@ -180,7 +174,7 @@ namespace MoogleEngine
                 }
             }
 
-
+            HelperMethods.MargeSortToListDouble(answer);
             return answer;
 
         }

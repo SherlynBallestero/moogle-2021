@@ -141,29 +141,12 @@ namespace MoogleEngine
             string[] newWords = new string[words.Length];
             int index = 0;
             string w = "";
-            bool change = false;
+
             foreach (string word in words)
             {
-                // for (int i = 0; i < word.Length; i++)
-                // {
-                //     if (char.IsLetter(word[i]) || char.IsNumber(word[i]))
-                //     {
-                //         w += word[i];
-                //     }
-                //     else
-                //     {
-                //         //change se hace false cuando hubo un caso en q se encontro con un char que no es letra
-                //         change = true;
-                //     }
-                // }
-                // w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-                // newWords[index] = w;
-                // w = "";
-                // index++;
-                // change = false;
-                w=word;
-                  w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-                  newWords[index] = w;
+                w = word;
+                w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
+                newWords[index] = w;
             }
             return newWords;
         }
@@ -193,7 +176,10 @@ namespace MoogleEngine
             for (int i = 0; i < file.Length; i++)
             {
                 string line = System.IO.File.ReadAllText(file[i]);
-                aux = TokenWords(line);
+               // aux = TokenWords(line);
+               line=Regex.Replace(line.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
+               aux=line.Split(' ');
+
                 words = Concat(words, aux);
 
             }
@@ -206,7 +192,7 @@ namespace MoogleEngine
         ///</summary>   
         public static string[] WordsInDocuments(string document)
         {
-            string[] reader = System.IO.File.ReadAllText(document).Split();
+            string[] reader = System.IO.File.ReadAllText(document).Split(' ');
             return reader;
 
         }
@@ -217,8 +203,8 @@ namespace MoogleEngine
         {
             score scr = new score();
             string[] allWordsInDocument = WordsInDocuments(document);
+            allWordsInDocument=WordInformation.NullDelet(allWordsInDocument);
             int[] ret = { -1 };
-            //if (TF(word, document) == 0) return ret;
             if (scr.TF(word, document) == 0) return ret;
             int[] answer = new int[Convert.ToInt32(scr.TF(word, document))];
             for (int i = 0, index = 0; i < allWordsInDocument.Length; i++)
@@ -234,7 +220,7 @@ namespace MoogleEngine
         ///<summary>
         ///Devuelve un cacho de codigo de determinado documento
         ///</summary>
-        public static string snippetForASpecificDocument(string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
+        public static string snippetForASpecificDocument(string[] files,string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
         {//**asegurarme de pasar el query limpio**
             int maxlarge = 40;
             int minlarge = 15;
@@ -243,7 +229,7 @@ namespace MoogleEngine
             string[] text = File.ReadAllText(pathToDocument).Split(' ');
 
             //List<int> aux=new List<int>();
-            string[] documents = dictionary[queryWords[0]].t1;
+            string[] documents = dictionary["en"].t1;
             int index = 0;
             List<string> MostValueWords = new List<string>();
             List<double> ValueForWords = new List<double>();
@@ -263,7 +249,7 @@ namespace MoogleEngine
             foreach (string word in queryWords)
             {
                 //obteniendo el valor de la palabra para el documento
-                ValueForWords.Add(score.TFIDF(pathToDocument, word, symbol)[index]);
+                ValueForWords.Add(score.TFIDF(files,pathToDocument, word, symbol)[index]);
             }
             //dados los valores por cada palabra del query se toman las mejores valoradas.
             double[] values = new double[ValueForWords.Count];
@@ -283,32 +269,26 @@ namespace MoogleEngine
             }
             string[] bestQuery = new string[MostValueWords.Count];
             //aqui se asumio q con las dos mejores palabras bastaban pero esta sujeto a cambio
-            MostValueWords.CopyTo(0, bestQuery, 0, 2);
+            MostValueWords.CopyTo(0, bestQuery, 0, bestQuery.Length);
 
             //obteniendo un array con todas las posiciones de todas las palabras del query en el documento dado.
             for (int i = 0; i < queryWords.Length; i++)
             {
-                //implementar concatInt
-                aux = ConcatInt(dictionary[queryWords[i]].t2[index], aux);
+                if(dictionary.ContainsKey(queryWords[i]))
+                    aux = ConcatInt(dictionary[queryWords[i]].t2[index], aux);
             }
 
-            Array.Sort(aux);
+            Array.Sort(aux);//ordena de menor a mayor
             //buscando el subconjunto de menor distancia al que pertenecen todas las palabras del query.
             int min = int.MaxValue;
             int lowerEnd = 0;
             int topEnd = 0;
-            //posiciones de las dos palabras mas importantes en el documento
-            int mostImpWordPosition1 = dictionary[bestQuery[0]].t2[index][0];
-            int mostImpWordPosition2 = dictionary[bestQuery[1]].t2[index][0];
+           
             //este boolean nos dira si entramos en el caso en el que las dos palabras con mas 
             //valor estan extremadamente separadas
             ///////revisar que esto no me de error
             bool extremeSeparation = false;
-            //para caso extremo decidimos estos bordes
-            int lowerbound1 = mostImpWordPosition1;
-            int upperbound1 = mostImpWordPosition1 + minlarge;
-            int lowerbound2 = mostImpWordPosition2 - minlarge;
-            int upperbound2 = mostImpWordPosition2;
+            
 
             for (int i = 0; i < aux.Length; i++)
             {
@@ -359,6 +339,15 @@ namespace MoogleEngine
             string answer2 = "";
             if (extremeSeparation)
             {
+                //que necesitamos
+                 //posiciones de las dos palabras mas importantes en el documento
+            int mostImpWordPosition1 = dictionary[bestQuery[0]].t2[index][0];
+            int mostImpWordPosition2 = dictionary[bestQuery[1]].t2[index][0];
+            //para caso extremo decidimos estos bordes
+            int lowerbound1 = mostImpWordPosition1;
+            int upperbound1 = mostImpWordPosition1 + minlarge;
+            int lowerbound2 = mostImpWordPosition2 - minlarge;
+            int upperbound2 = mostImpWordPosition2;
 
                 for (int i = lowerbound1, j = lowerbound2; i < upperbound1; i++)
                 {
@@ -384,7 +373,7 @@ namespace MoogleEngine
             string[] answer=new string[files.Length];
             for(int i=0;i<files.Length;i++)
             {
-                answer[i]=snippetForASpecificDocument(query,dictionary,files[i],symbol);
+                answer[i]=snippetForASpecificDocument(files,query,dictionary,files[i],symbol);
             }
             return answer;
         }
@@ -475,7 +464,8 @@ namespace MoogleEngine
         {
             foreach (string word in queryWords)
             {
-                if (!IsInSet(dictionary[word].t2[documentIndex], lowerEnd, topEnd)) return false;
+                if(dictionary.ContainsKey(word))
+                    if (!IsInSet(dictionary[word].t2[documentIndex], lowerEnd, topEnd)) return false;
             }
             return true;
         }

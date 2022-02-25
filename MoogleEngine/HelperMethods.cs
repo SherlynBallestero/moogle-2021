@@ -366,5 +366,83 @@ namespace MoogleEngine
             
             
         }
+        ///<summary>
+        ///Metodo margesort para ordenar list<double,string>
+        ///</summary> 
+        public static void MargeSortToListDouble(List<(double,string)> list)
+        {
+            MargeSortToListDouble(list,0,list.Count-1);
+        }
+        public static void MargeSortToListDouble(List<(double,string)> list,int start, int end)
+        {
+            //condicion de parada
+            if(start==end)return;
+            //buscando el medio de la lista de elementos
+            int mit=(start+end)/2;
+            //ordenar1ra mitad y luego la segunda
+            MargeSortToListDouble(list,start,mit);
+            MargeSortToListDouble(list,mit+1,end);
+            MargeDouble(list,start,mit,mit+1,end);
+            //copiar los elementos de aux a x
+            list=new List<(double, string)>();          
+            list=CopyListToListDouble(list);
+        } 
+        public static List<(double,string)> MargeDouble(List<(double,string)> list,int start1,int end1,int start2,int end2)
+        {
+            int a=start1;
+            int b=start2;
+            List<(double,string)> answer=new List<(double, string)>();
+            int t=(end1-start1)+(end2-start2);
+            for(int i=0;i<t;i++)
+            {
+                if(b!=list.Count)
+                {
+                    if(a>end1 && b<=end2)
+                    {
+                        answer.Add(list[b]);
+                        b++;
+                    }
+                    if(b>end2 && a<=end1)
+                    {
+                        answer.Add(list[a]);
+                        a++;
+                    }
+                          if(b<=end2 && a<=end1)
+                    {
+                        if(list[a].Item1>+list[b].Item1)
+                        {
+                            answer.Add(list[a]);
+                            a++;
+                        }
+                        else
+                        {
+                            answer.Add(list[b]);
+                            b++;
+                        }
+                    }
+
+                }
+                else
+                {
+                    if(a<=end1)
+                    {
+                        answer.Add(list[a]);
+                        a++;
+                    }
+                }
+            }
+            return answer;
+        }
+        public  static List<(double,string)> CopyListToListDouble(  List<(double,string)> list)
+        {
+            List<(double,string)>answer=new List<(double, string)>();
+            for(int i=0;i<list.Count;i++)
+            {
+                answer[i]=list[i];
+            }
+            return answer;
+            
+            
+        }
     }
 }

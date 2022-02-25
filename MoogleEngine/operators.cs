@@ -20,7 +20,7 @@ namespace MoogleEngine
         ///</summary>
         public static (Symbol symbol,string[] pharse) GetSymbol(string query,string route)
         {
-            string[] phrase = HelperMethods.TokenWords(query);
+           // string[] phrase = query.Split(' ');
             string[] words = query.Split(' ');
             //para saber a cual palabra ya sin los operadores corresponde la palabra del query que se analiza
             int count = -1;
@@ -48,7 +48,7 @@ namespace MoogleEngine
                     {
                         //implementar cuenta asteriscos
                         //count= CountAsterisks(word);
-                        asterisks.Add(phrase[count], CountAsterisks(word));
+                        asterisks.Add(words[count], CountAsterisks(word));
 
                     }
                 }
@@ -61,12 +61,12 @@ namespace MoogleEngine
             //para evitar que sean null si no hay palabras afectadas por ^ y !
             if(yes==" ")yes="notElements";
             if(no==" ")no="notElements";
-            if(Closeness[0].Item1 is null)Closeness.Add(("notElements","notElements"));
-            if(asterisks is null)asterisks.Add("notElements",-1);
+            if(Closeness.Count==0)Closeness.Add(("notElements","notElements"));
+            if(asterisks.Count==0)asterisks.Add("notElements",-1);
 
             (string[] t1, string[] t2) banDocs = (HelperMethods.TokenWords(yes), HelperMethods.TokenWords(yes));
             Symbol answer = new Symbol(banDocs, asterisks, Closeness);
-            return (answer,phrase);
+            return (answer,words);
         }
 
         ///<summary>
@@ -81,6 +81,7 @@ namespace MoogleEngine
             if(words[0].t1=="notElements")
             {
                 distanceForDocument.Add((0,"notElements"));
+                return distanceForDocument;
             }
             string[] files = Directory.GetFiles(route, "*.txt");
             //pasamos por cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 

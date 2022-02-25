@@ -10,7 +10,7 @@ public static class Moogle
         //nombre de los archivos en el path
         string[] filesNames=Directory.GetFileSystemEntries(path);
         //obtener direcciones hacia los archivos contenidos en la coleccion
-        string[] filesPath=Directory.GetFiles(path);
+        string[] filesPath=Directory.GetFiles(path,"*txt");
         //implementar lo de los sinonimos,que dios me ayude y no se me olvide que ouse esto aqui
         
         //instancia de la clase wordInfp para obtener los diccionarios
@@ -18,10 +18,31 @@ public static class Moogle
         //Obteniendo Dictionary con todas las palabras de la coleccion de documentos y sus 
         //respectivas posiciones por documento
         Dictionary<string, (string[], List<int[]>)> DictionaryForPositions=wordInfo.FillDictionary().t2;
-        //Obteniendo Dictionary con todas las palabras de la coleccion de documentos y sus 
-        //respectivas frecuencias por documento
-        Dictionary<string, (string[], List<double>)> DictionaryForTF=wordInfo.FillDictionary().t1;
-        //...operadores...
+        //Obteniendo Dictionary con todas las palabras de la coleccion y sus 
+        // frecuencias por documento
+       //// Dictionary<string, (string[], List<double>)> DictionaryForTF=wordInfo.FillDictionary().t1;
+        //hallando una sugerencia para el query.
+        Suggestion sgt=new Suggestion(query);
+        string suggestion=sgt.suggestionForQuery(DictionaryForPositions);
+        //se revisa si contenemos al query entre nuestros documentos
+        string[] pharse=HelperMethods.TokenWords(query);
+       bool contain=false;
+        for(int i=0;i<pharse.Length;i++)
+        {
+            if(DictionaryForPositions.ContainsKey(pharse[i]))contain=true;
+        }
+        if(!contain)
+        {
+            //***cuando no encontramos al query entre los documentos
+            
+         SearchItem[] items1 = new SearchItem[1] {
+      new SearchItem("Not Found", "Not Found", 0.9f)};
+      
+      return new SearchResult(items1, suggestion);
+         //retornar sugerencia o algo aun no se
+        }
+        //***cuando si encontramos al query entre nuestros documentos...***
+           //...operadores...
         //obteniendo symbol para trabajar con los operadores.
         Symbol symbol=operators.GetSymbol(query,path).symbol;
         //obteniendo array de palabras del query sin operadores
@@ -31,23 +52,21 @@ public static class Moogle
         //lista de score por nombre de documento ordenados de mayor a menor
         List<(double, string)> scores=score.MV(DistanceInWordsWhithOperator,filesPath,newQuery,query,symbol,DictionaryForPositions,path); 
         //cacho de codigo por documento
-        string[] snippet=WordInformation.snippet(newQuery,DictionaryForPositions,filesPath,symbol);
-        // Modifique este método para responder a la búsqueda
+        //string[] snippet=WordInformation.snippet(newQuery,DictionaryForPositions,filesPath,symbol);
+        
 
-        // SearchItem[] items = new SearchItem[3] {
-        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.9f),
-        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.5f),
-        //     new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.1f),
-        // };
+
+
+
 
         
-         SearchItem[] items = new SearchItem[10]; 
-        for(int i=0;i<10;i++)
+         SearchItem[] items = new SearchItem[3]; 
+        for(int i=0;i<3;i++)
         {
-           SearchItem aux=new SearchItem(scores[i].Item2,"algo",Convert.ToSingle( scores[i].Item1));
-           items[i]=aux;
+           items[i]=new SearchItem(scores[i].Item2,"algo",(float)scores[i].Item1);
+           
         }
-        return new SearchResult(items, query);
+        return new SearchResult(items, suggestion);
     }
 
 }
