@@ -238,7 +238,7 @@ namespace MoogleEngine
            {
                //no se va a verificar pq si es una sola palabra y el dictionary no la
                // contiene nunca entra a crear snnippet y lanza la sugerencia 
-               int pos=dictionary[queryWords[0]].t2[index][0];
+               int pos=dictionary.ContainsKey(queryWords[0])?dictionary[queryWords[0]].t2[index][0]:0;
                 pos=pos-5>=0?pos-5:0;
                 int end=pos+30<text.Length?end=pos+30:text.Length;
                 return string.Join(" ",text[pos..end]);

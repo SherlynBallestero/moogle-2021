@@ -13,7 +13,7 @@ namespace MoogleEngine
         public static Dictionary<string, List<string>> TekeDictionarySyn()
         {
             string parent = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
-            string path = Path.Join(parent, "DicctionarySyn" , "sinonimos.json");
+            string path = Path.Join(parent, "DicctionarySyn" , "Synonymous.json");
             Dictionary<string,List<string>> sinonimos = new Dictionary<string, List<string>>();
             string fileContent = File.ReadAllText(path);
             return sinonimos = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(fileContent) ?? throw new Exception();

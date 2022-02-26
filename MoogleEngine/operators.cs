@@ -48,7 +48,8 @@ namespace MoogleEngine
                     {
                         //implementar cuenta asteriscos
                         //count= CountAsterisks(word);
-                        asterisks.Add(words[count], CountAsterisks(word));
+                       if (!asterisks.ContainsKey(words[count]))
+                         asterisks.Add(words[count], CountAsterisks(word));
 
                     }
                 }

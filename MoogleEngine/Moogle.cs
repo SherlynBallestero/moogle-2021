@@ -29,7 +29,7 @@ public static class Moogle
 
         //Obteniendo Dictionary con todas las palabras de la coleccion y sus 
         // frecuencias por documento(convertir en tfidf)
-        //////// Dictionary<string, (string[], List<double>)> DictionaryForTF=wordInfo.FillDictionary().t1;
+        //////// Dictionary<string, (string[], List<double>)> DictionaryForTFidf=wordInfo.FillDictionary().t1;
         //dictionary de sinonimos
         Dictionary<string, List<string>> sinonymous = DictionaryWork.TekeDictionarySyn();
 

@@ -90,9 +90,6 @@ namespace MoogleEngine
             double[] queryForVector = new double[words.Length];
             double[,] mdt = new double[words.Length, file.Length];
             double[] auxDouble = new double[words.Length];
-        
-            //...eliminar... double[] score;
-            //...eliminar... int[] indexs;
 
             for (int i = 0; i < words.Length; i++)
             {
