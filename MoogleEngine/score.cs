@@ -150,7 +150,7 @@ namespace MoogleEngine
             }
             else
             {
-                for (int i = 0, j = 0; i < cosin.Length; i++)
+                for (int i = 0; i < cosin.Length; i++)
                 {
                    answer.Add((cosin[i], file[i]));
                 }

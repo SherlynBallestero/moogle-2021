@@ -224,15 +224,27 @@ namespace MoogleEngine
         {//**asegurarme de pasar el query limpio**
             int maxlarge = 40;
             int minlarge = 15;
-            //string[] queryWords = query.Split();
-            int[] aux = new int[2];
-            string[] text = File.ReadAllText(pathToDocument).Split(' ');
+           int[] aux = new int[2];
+            string[] text = File.ReadAllText(pathToDocument).Split();
 
             //List<int> aux=new List<int>();
+            //se utiliza el dictionary para obtener los documentos
             string[] documents = dictionary["en"].t1;
             int index = 0;
             List<string> MostValueWords = new List<string>();
             List<double> ValueForWords = new List<double>();
+            //para cuando el query tiene solo una palabra
+           if(queryWords.Length==1)
+           {
+               //no se va a verificar pq si es una sola palabra y el dictionary no la
+               // contiene nunca entra a crear snnippet y lanza la sugerencia 
+               int pos=dictionary[queryWords[0]].t2[index][0];
+                pos=pos-5>=0?pos-5:0;
+                int end=pos+30<text.Length?end=pos+30:text.Length;
+                return string.Join(" ",text[pos..end]);
+
+           }
+           
 
 
             //buscando cual es el indice correspondiente al documento para ubicarse en el diccionary a cual 
@@ -256,20 +268,23 @@ namespace MoogleEngine
             ValueForWords.CopyTo(0, values, 0, ValueForWords.Count - 1);
             Array.Sort(values);
             //que palabra tiene mayor valor?
-            for (int i = 0; i < values.Length / 2; i++)
-            {
+            for (int i = 0; i < 2; i++)
+            {   if(values.Length<2 && i==1)break;
                 for (int j = 0; j < ValueForWords.Count; j++)
                 {
                     //en values tenemos los valores ordenados de mayor a 
                     //menor,se espera obtener ahora a que palabras les corresponde los mayores valores
                     //las localizamos dadas la lista no ordenada ya que en el indice j se encuentra el indice 
-                    //correspondiente a la palabra a la se le asigna dicho valor.
-                    if (values[i] == ValueForWords[j]) MostValueWords.Add(queryWords[j]);
+                    //correspondiente a la palabra a la que se le asigna dicho valor.
+                    if (values[i] - ValueForWords[j]<0.000001) MostValueWords.Add(queryWords[j]);
                 }
             }
-            string[] bestQuery = new string[MostValueWords.Count];
+            string bestQuery1 = MostValueWords.Count>0? MostValueWords[0]:"-";
+            string bestQuery2 = MostValueWords.Count>0? MostValueWords[1]:"-";
+            string[] bestQuery={bestQuery1,bestQuery2};
+
             //aqui se asumio q con las dos mejores palabras bastaban pero esta sujeto a cambio
-            MostValueWords.CopyTo(0, bestQuery, 0, bestQuery.Length);
+    // MostValueWords.CopyTo(0, bestQuery, 0, bestQuery.Length);
 
             //obteniendo un array con todas las posiciones de todas las palabras del query en el documento dado.
             for (int i = 0; i < queryWords.Length; i++)
@@ -334,34 +349,32 @@ namespace MoogleEngine
                 }
             }
             //ahora se tomara el texto a devolver
-            string answer = " ";
+            string answer = "";
             //para caso extremo de separacion
             string answer2 = "";
             if (extremeSeparation)
             {
                 //que necesitamos
-                 //posiciones de las dos palabras mas importantes en el documento
-            int mostImpWordPosition1 = dictionary[bestQuery[0]].t2[index][0];
-            int mostImpWordPosition2 = dictionary[bestQuery[1]].t2[index][0];
-            //para caso extremo decidimos estos bordes
-            int lowerbound1 = mostImpWordPosition1;
-            int upperbound1 = mostImpWordPosition1 + minlarge;
-            int lowerbound2 = mostImpWordPosition2 - minlarge;
-            int upperbound2 = mostImpWordPosition2;
-
-                for (int i = lowerbound1, j = lowerbound2; i < upperbound1; i++)
+                 //posiciones de las dos palabras mas importantes en el documento(dos randoms)
+                 int mostImpWordPosition1 = dictionary[bestQuery1].t2[index][0];
+                 int mostImpWordPosition2=0;
+                
+                 if(dictionary.ContainsKey(bestQuery2))
                 {
-                    answer += text[i] + " ";
-                    if (j < text.Length) answer2 += text[j] + " ";
+                     mostImpWordPosition2 = dictionary[bestQuery2].t2[index][0];
                 }
-                answer = answer + "..." + answer2;
+          
+               //para caso extremo decidimos estos bordes
+                int lowerbound1 = mostImpWordPosition1;
+                int upperbound1 = mostImpWordPosition1 + minlarge;
+                int lowerbound2 = mostImpWordPosition2 - minlarge>0?mostImpWordPosition2 - minlarge:0;
+                int upperbound2 = mostImpWordPosition2;
+                answer += string.Join(" ",text[lowerbound1..upperbound1]);
+                if (lowerbound2 >=0) answer+="(...)" + string.Join(" ",text[lowerbound2..upperbound2]);
             }
             else
             {
-                for (int i = lowerEnd; i < topEnd; i++)
-                {
-                    answer += text[i] + " ";
-                }
+                answer=string.Join(" ",text[lowerEnd..topEnd]);
             }
             return answer;
         }
@@ -412,17 +425,7 @@ namespace MoogleEngine
             }
             return (wordsTf, wordInf);
         }
-        // // //  public void RealeaseDictionary()
-        // // //  {
-        // // //      File.WriteAllText(@"D:\cibernética\cibernética\Primer año\pro\proyectos\proyectoFormal\First project moogle-2021\Dicctionary",contents: JsonSerializer.Serialize(vocabulary));
-        // // //  }
-        // // //  public void TekeDictionary()
-        // // //  {
-        // // //      _vocabulary=JsonSerializer.Deserialize<Dictionary<string, (string[], List<double>, List<int[]>)>>(json:File.ReadAllText(@"D:\cibernética\cibernética\Primer año\pro\proyectos\proyectoFormal\First project moogle-2021\Dicctionary"))??throw new Exception();
-        // // //  }
-        ///<summary>
-        ///Metodo para concatenar dos arrays de enteros
-        ///</summary>
+      
         public static int[] ConcatInt(int[] a, int[] b)
         {
             int[] concated = new int[a.Length + b.Length];
