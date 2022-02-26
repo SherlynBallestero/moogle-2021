@@ -25,6 +25,14 @@ En Moogle este proceso se lleva a cabo dentro de la clase score.cs:
         ...
     }
 ```
+En el score que adquieren los documentos por términos actúa además la utilización de operadores.
+
+## Operadores.
+Los operadores empleados en Moogle! son:
+- Un símbolo `!` delante de una palabra (e.j., `"algoritmos de búsqueda !ordenación"`) indica que esa palabra **no debe aparecer** en ningún documento que sea devuelto.
+- Un símbolo `^` delante de una palabra (e.j., `"algoritmos de ^ordenación"`) indica que esa palabra **tiene que aparecer** en cualquier documento que sea devuelto.
+- Un símbolo `~` entre dos o más términos indica que esos términos deben **aparecer cerca**, o sea, que mientras más cercanos estén en el documento mayor será la relevancia. Por ejemplo, para la búsqueda `"algoritmos ~ ordenación"`, mientras más cerca están las palabras `"algoritmo"` y `"ordenación"`, más alto debe ser el `score` de ese documento.
+
 
 
 
