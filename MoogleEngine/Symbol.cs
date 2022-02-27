@@ -15,9 +15,5 @@ namespace MoogleEngine
             this.asterisks=asterisks;
             this.Closeness=Closeness;
         }
-       
-        
-      
-
     }
 }

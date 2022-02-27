@@ -127,8 +127,8 @@ namespace MoogleEngine
             {
                 cosin[i] = vectors[i].CosVector(queryVector);
             }
-            // score = hM.Ordenar(cosin, out indexs);
-            //haremos cero el score de los documentos vetados
+           
+            //no se agregan a la solución los documentos vetados
             List<string> BanDocuments = operators.BanDocuments(symbol,route);
             if (BanDocuments.Count!=0)
             {

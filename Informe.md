@@ -33,6 +33,59 @@ Los operadores empleados en Moogle! son:
 - Un símbolo `^` delante de una palabra (e.j., `"algoritmos de ^ordenación"`) indica que esa palabra **tiene que aparecer** en cualquier documento que sea devuelto.
 - Un símbolo `~` entre dos o más términos indica que esos términos deben **aparecer cerca**, o sea, que mientras más cercanos estén en el documento mayor será la relevancia. Por ejemplo, para la búsqueda `"algoritmos ~ ordenación"`, mientras más cerca están las palabras `"algoritmo"` y `"ordenación"`, más alto debe ser el `score` de ese documento.
 
+`"Cómo los modelamos????"`
+Dado una petición del usuario procedemos a anlizar los operadores que la afectan y se utiliza la clase `"Symbol.cs"` para definir el objeto que se quiere de vuelta. Es decir se aplica la función `"GetSymbol"` contenida en `"operators.cs"` para obtener un symbol y el conjunto de palabras que integran al query libre de operadores.
+Un symbol definido por la clase Symbol.cs:
+
+```cs
+  public class Symbol
+    {
+        //para almacenar en yes las palabras afectadas por el operador ^(yes porque esas palabras deben aparecer en el documento)
+        //en no guardamos las palabras afectadas por el operador !
+        public (string[] yes,string[] no) banDocs;
+        public Dictionary<string, int> asterisks;
+       public List<(string,string)> Closeness;
+        //constructor
+        public Symbol((string[] yes,string[] no) banDocs, Dictionary<string, int> asterisks,List<(string,string)> Closeness)
+        {
+            this.banDocs=banDocs;
+            this.asterisks=asterisks;
+            this.Closeness=Closeness;
+        }
+    }
+```
+
+contiene tres componentes donde:
+
+ 
+`banDocs` 
+
+Es empleado para almacenar  los documentos que son afectados por los operadosres ^ (en el array yes) y !(en el array no). En la clase score luego de asignar el valor correspondiente al coseno entre los vectores documentos y vector término no se agregan a la solución  los documentos que se vetan,se dice que se vetan dado que son los documentos que no se quieren en la respuesta.
+
+```cs
+    //haremos cero el score de los documentos vetados
+            List<string> BanDocuments = operators.BanDocuments(symbol,route);
+            if (BanDocuments.Count!=0)
+            {
+                for (int i = 0, j = 0; i < cosin.Length; i++)
+                {
+                    while (j < BanDocuments.Count)
+                    {
+                        if (BanDocuments[j] != file[i])
+                        {
+                            //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
+                            answer.Add((cosin[i], file[i]));
+                        }
+                        j++;
+                    }
+                }
+            }
+```   
+
+`asterisks`
+
+`Closeness`
+
 
 
 
