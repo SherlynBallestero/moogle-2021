@@ -152,14 +152,14 @@ namespace MoogleEngine
                    answer.Add((cosin[i], file[i]));
                 }
             }
-            //aumentar el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
-            //primero se verifica si hay palabras afectadas por este operador
-            //se aumenta el score en un  20% de los 7 documentos con mejores resultados cercania dadas las condiciones del operador.
+            //Se aumenta el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
+            //primero se verifica si hay palabras afectadas por este operador se aumenta el score en un  20% del 25% de los  documentos 
+            //con mejores resultados de cercanía dadas las condiciones del operador.
             double increment = 5 / 10;
             if (Closeness[0].document != "notElements")
             {
                 int indexAux = 0;
-                while (indexAux <= 7)
+                while (indexAux <= answer.Count/4)
                 {
                     for (int i = 0; i < answer.Count; i++)
                     {

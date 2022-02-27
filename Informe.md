@@ -83,8 +83,23 @@ Es empleado para almacenar  los documentos que son afectados por los operadosres
 ```   
 
 `asterisks`
+Las palabras que almacenamos en este dictionary serán las que contienen asteriscos en la consulta (la clave) y tendrán correspondida la cantidad. Su insidencia sobre el score se trabaja a la hora de calcuar el peso de los términos. Donde antes de calcular el peso,se verifica si el término en el query contiene asteriscos y se le da un valor a `double increase` equivalente a 2^(cantidad de asteriscos que contiene), si no contiene increase vale 1.
 
 `Closeness`
+ Closeness(1) es una lista que contiene `(string t1, strieg t2)` donde t1 y t2 son las palabras que estan separadas por `~`. Luego en la clase `operators.cs` en el método `Closeness` se procesa esta lista y se obtiene una `List<(int closeness, string document) >`(2) donde por cada indice de (1) se tiene una correspondencia con (2) de minima distancia de las palabras del indice i en (1) en cada documento.
+ Finalmente en la asignación de score antes de devolver los score se aumenta el valor de los documentos que tienen a las palabras que se encuentran cerca afectados por el operador `~` en un  20% del 25% de los  documentos con mejores resultados de cercanía dadas las condiciones del operador. 
+
+ ## SUGERENCIA 
+
+ El parámetro `suggestion` de la clase `SearchResult` es para darle una sugerencia al usuario cuando su búsqueda da muy pocos resultados (tú debes decidir qué serían pocos resultados en este contexto). Esta sugerencia debe ser algo similar a la consulta del usuario pero que sí exista, de forma que si el usuario se equivoca, por ejemplo, escribiendo `"reculsibidá"`, y no aparece (evidentemente) ningún documento con ese contenido, le podamos sugerir la palabra `"recursividad"`.
+ 
+ Se soluciona este aspecto en la clase `suggestion.cs` . Primero con la función `SimilarityInWords` se busca la similitud entre dos palabras. Nos enfrentamos a hallar algo similar al Edit Distance. El Edit Distance es la minima cantidad de caracteres que debemos cambiar agregar o eliminar de una palabra para obtener otra. En este caso a cada caracter se le hace corresponder un peso en escala logaritmica de derecha a izquierda para cada string. Luego trataremos de hacer  matches de caracteres tal que se maximice el peso. En caso de que ,atcheen se tendra en cuenta las posiciones relativas de los caracteres, en caso de que no solo se le aplica un porciento pequeño de su valor, y en el caso de eliminar o agregar caracteres no se suma ningun peso. Se le da más valor a los prefijos, se le da valor a las posiciones relativas de los caracteres que matcheen, se le da un valor pequeño a los cambios de caracter y no se le da valor a las eliminaciones o agregos de caracteres. La respuesta es el porciento de similitud. Luego se encuentra la sugerencia a partir del query y las similitudes con las palabras que se tienen en la colección de documentos.
+
+ ## SINONIMOS
+ 
+
+ 
+      
 
 
 

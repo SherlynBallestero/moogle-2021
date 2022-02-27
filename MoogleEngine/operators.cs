@@ -71,12 +71,12 @@ namespace MoogleEngine
         }
 
         ///<summary>
-        ///metodo para determinar las cercanias entre dos palabras dada sus posiciones(para el operador "~")
-        ///retorna las distancias mas cortas por documento a partir de las palabras que se le da como imput.
+        ///Función que determina las cercanias entre dos palabras dadas sus posiciones(para el operador "~")
+        ///retorna las distancias más cortas por documento a partir de las palabras que se le da como imput.
         ///</summary>
         public static List<(int closeness, string document)> Closeness(Symbol symbol,string route,  Dictionary<string, (string[] index1, List<int[]> index2)> positions)
         {
-           //// HelperMetods hM = new HelperMetods(this.path);
+           
             List<(string t1, string t2)> words = symbol.Closeness;
            List<(int, string)> distanceForDocument = new List<(int,string)>();
             if(words[0].t1=="notElements")
@@ -85,7 +85,7 @@ namespace MoogleEngine
                 return distanceForDocument;
             }
             string[] files = Directory.GetFiles(route, "*.txt");
-            //pasamos por cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 
+            //se  recorre cada carpeta haciendo el proceso de obtener las distancias minimas entre las posiciones 
             //en que se encuentran las palabras que nos interesa.
             int distance = 0;
             

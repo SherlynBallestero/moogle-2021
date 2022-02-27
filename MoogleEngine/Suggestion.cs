@@ -8,37 +8,26 @@ namespace MoogleEngine
             this.query = query;
         }
         ///<summary>
-        ///Metodo que retorna la similitud entre dos palabras.
-        ///Aqui nos enfocaremos en hallar algo similar al Edit Distance entre dos palabras
-        ///El Edit Distance es la minima cantidad de caracteres que debemos cambiar
-        ///agregar o eliminar de una palabra para obtener otra
-        ///En este caso nuestra funcion sera diferente ya que a cada caracter le haremos
-        ///corresponder un peso en escala logaritmica de derecha a izquierda para cada string
-        ///Luego trataremos de hacer matches de caracteres tal que se maximice el peso
-        ///Tambien tendremos en cuenta las posiciones relativas de los caracteres en caso
-        ///de que matcheen, en caso de que no matcheen solo le aplicaremos un porciento pequenno de su
-        ///valor, y en caso de eliminar o agregar caracteres no sumaremos ningun peso
-        ///Le daremos mas valor a los prefijos, le daremos valor a las
-        ///posiciones relativas de los caracteres que matcheen, le daremos un valor pequeno a los 
-        ///cambios de caracter y no le daremos valor a las eliminaciones o agregos de caracteres
-        ///La respuesta sera mas bien el por ciento de similitud
+        ///Metodo que retorna la similitud entre dos palabras. A cada caracter le haremos
+        ///corresponder un peso en escala logaritmica de derecha a izquierda para cada string 
+        ///retorna el por ciento de similitud.
         ///</summary>
         double SimilarityInWords(string s1, string s2)
         {
-            //Tamanno de la primera palabra
+            //Tamaño de la primera palabra.
             int n = s1.Length;
-            //Tamanno de la segunda palabra
+            //Tamaño de la segunda palabra.
             int m = s2.Length;
 
-            //Si algun string tiene tamanno 0 entonces no hay similitud
+            //Si algun string tiene tamaño 0 entonces no hay similitud.
             if (n == 0 || m == 0) return 0;
 
-            //Pesos en escala logaritmica para el primer string
+            //Pesos en escala logaritmica para el primer string.
             double[] v1 = new double[n];
-            //Pesos en escala logaritmica para el segundo string
+            //Pesos en escala logaritmica para el segundo string.
             double[] v2 = new double[m];
-            //dp[i,j] indica el maximo match de pesos entre el prefijo de tamanno i del primer string
-            //y el prefijo de tamanno j del segundo string
+            //dp[i,j] indica el maximo match de pesos entre el prefijo de tamaño i del primer string
+            //y el prefijo de tamaño j del segundo string.
             double[,] dp = new double[n + 1, m + 1];
 
             //Aqui almacenaremos la sumatoria de todos los pesos de ambos string
@@ -108,7 +97,7 @@ namespace MoogleEngine
             return Math.Min(Math.Max(dp[n, m] / tot, 0), 1);
         }
         ///<summary>
-        ///funcion para encontrat la sugerencia a partur d elas similitudes de las palabras que tenemos en 
+        ///funcion para encontrat la sugerencia a partur de las similitudes de las palabras que tenemos en 
         ///los documentos con en query ingresado.
         ///</summary>
         public string suggestionForQuery( Dictionary<string, (string[], List<int[]>)> dictionary)
@@ -120,8 +109,8 @@ namespace MoogleEngine
             string aux="";
             foreach (string word in words)
             {
-                //vamos a buscar palabras similares solo cuando no se encuentra alguna de las palabras del query en 
-                //nuestros documentos
+                //Se buscan palabras similares solo cuando no se encuentra alguna de las palabras del query en 
+                //los documentos
                 if (!dictionary.ContainsKey(word))
                 {
                     foreach (string key in dictionary.Keys)
