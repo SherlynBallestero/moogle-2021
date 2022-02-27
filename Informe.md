@@ -96,7 +96,12 @@ Las palabras que almacenamos en este dictionary serán las que contienen asteris
  Se soluciona este aspecto en la clase `suggestion.cs` . Primero con la función `SimilarityInWords` se busca la similitud entre dos palabras. Nos enfrentamos a hallar algo similar al Edit Distance. El Edit Distance es la minima cantidad de caracteres que debemos cambiar agregar o eliminar de una palabra para obtener otra. En este caso a cada caracter se le hace corresponder un peso en escala logaritmica de derecha a izquierda para cada string. Luego trataremos de hacer  matches de caracteres tal que se maximice el peso. En caso de que ,atcheen se tendra en cuenta las posiciones relativas de los caracteres, en caso de que no solo se le aplica un porciento pequeño de su valor, y en el caso de eliminar o agregar caracteres no se suma ningun peso. Se le da más valor a los prefijos, se le da valor a las posiciones relativas de los caracteres que matcheen, se le da un valor pequeño a los cambios de caracter y no se le da valor a las eliminaciones o agregos de caracteres. La respuesta es el porciento de similitud. Luego se encuentra la sugerencia a partir del query y las similitudes con las palabras que se tienen en la colección de documentos.
 
  ## SINONIMOS
- 
+ Los sinonimos se obtienen de `Synonymous.json` guardado en la carpeta `DicctionarySyn`. 
+ Al ser JSON un formato muy extendido para el intercambio de datos, se han desarrollado API para distintos lenguajes  que permiten analizar sintácticamente, generar, transformar y procesar este tipo de dato, es decir,podemos convertir objetos JSON en objetos del lenguaje. De este modo con la clase `class System.Text.Json.JsonSerializer` se trnasforma el .json del directorio en un `Dictionary<string,List<string>>`, donde a cada palabra se le asigna sus sinonimos. Estos sinonimos se planean empleadar en una optimización del Moogle! para tener busquedas más efectivas donde a los documentos que contengan sinonimos de los términos de la busqueda se les haga corresponder un valor.
+ ## SNIPPET
+  
+
+
 
  
       
