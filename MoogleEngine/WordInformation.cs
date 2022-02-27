@@ -218,16 +218,14 @@ namespace MoogleEngine
             return answer;
         }
         ///<summary>
-        ///Devuelve un cacho de codigo de determinado documento
+        ///Devuelve un segmento de codigo de determinado documento
         ///</summary>
         public static string snippetForASpecificDocument(string[] files,string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
-        {//**asegurarme de pasar el query limpio**
+        {//Nota:**asegurarme de pasar el query limpio**
             int maxlarge = 40;
             int minlarge = 15;
            int[] aux = new int[2];
             string[] text = File.ReadAllText(pathToDocument).Split();
-
-            //List<int> aux=new List<int>();
             //se utiliza el dictionary para obtener los documentos
             string[] documents = dictionary["en"].t1;
             int index = 0;
@@ -236,17 +234,14 @@ namespace MoogleEngine
             //para cuando el query tiene solo una palabra
            if(queryWords.Length==1)
            {
-               //no se va a verificar pq si es una sola palabra y el dictionary no la
-               // contiene nunca entra a crear snnippet y lanza la sugerencia 
+               //no se va a verificar si se encuentra porque si es solo un termino y el dictionario de posiciones no la
+               // contiene nunca entra a crear el snippet y devuelve una la sugerencia. 
                int pos=dictionary.ContainsKey(queryWords[0])?dictionary[queryWords[0]].t2[index][0]:0;
                 pos=pos-5>=0?pos-5:0;
                 int end=pos+30<text.Length?end=pos+30:text.Length;
                 return string.Join(" ",text[pos..end]);
-
            }
            
-
-
             //buscando cual es el indice correspondiente al documento para ubicarse en el diccionary a cual 
             //conjunto de posiciones acceder.
             for (int i = 0; i < documents.Length; i++)
@@ -284,8 +279,6 @@ namespace MoogleEngine
             string[] bestQuery={bestQuery1,bestQuery2};
 
             //aqui se asumio q con las dos mejores palabras bastaban pero esta sujeto a cambio
-    // MostValueWords.CopyTo(0, bestQuery, 0, bestQuery.Length);
-
             //obteniendo un array con todas las posiciones de todas las palabras del query en el documento dado.
             for (int i = 0; i < queryWords.Length; i++)
             {
@@ -299,7 +292,7 @@ namespace MoogleEngine
             int lowerEnd = 0;
             int topEnd = 0;
            
-            //este boolean nos dira si entramos en el caso en el que las dos palabras con mas 
+            //este boolean dira si entramos en el caso en el que las dos palabras con mas 
             //valor estan extremadamente separadas
             ///////revisar que esto no me de error
             bool extremeSeparation = false;
@@ -318,7 +311,7 @@ namespace MoogleEngine
                     }
                 }
             }
-            //tomando en el array documento un cacho desente se construye a partir del array
+            //tomando en el array documento un segmento adecuado se construye a partir del array
             //priemro se ajusta el espacio que se tomara
             if ((topEnd - lowerEnd) > maxlarge)
             {
@@ -379,7 +372,7 @@ namespace MoogleEngine
             return answer;
         }
         ///<summary>
-        ///Devuelve un cacho de codigo para cada documento
+        ///Devuelve un segmento de codigo para cada documento
         ///</summary>
         public static string[] snippet(string[] query, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string[] files, Symbol symbol)
         {
