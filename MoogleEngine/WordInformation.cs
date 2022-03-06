@@ -374,8 +374,8 @@ namespace MoogleEngine
                 int upperbound1 = mostImpWordPosition1 + minlarge;
                 int lowerbound2 = mostImpWordPosition2 - minlarge>=0?mostImpWordPosition2 - minlarge:0;
                 int upperbound2 = mostImpWordPosition2;
-                answer += string.Join(" ",text[lowerbound1..upperbound1]);
-                if (lowerbound2 >=0 && upperbound2 >= 0) answer+="(...)" + string.Join(" ",text[lowerbound2..upperbound2]);
+                if(Math.Max(lowerbound1,0) < Math.Min(upperbound1, text.Length))answer += string.Join(" ",text[Math.Max(lowerbound1,0)..Math.Min(upperbound1, text.Length)]);
+              //  if (lowerbound2 >=0 && upperbound2 >= 0) answer+="(...)" + string.Join(" ",text[lowerbound2..upperbound2]);
             }
             else
             {
@@ -433,7 +433,7 @@ namespace MoogleEngine
         /// documento la frecuencia de dada palabra para cada documento y otro que por cada documento almacena las
         /// documento la frecuencia de dada palabra para cada documento.    
         ///</summary>        
-        public (Dictionary<string, List<double>> t1, Dictionary<string, List<List<int>>> t2) FillDictionary()
+        public (Dictionary<string, List<double>> TF, Dictionary<string, double> IDF, Dictionary<string, List<List<int>>> Pos) FillDictionary()
         {
             score score = new score();
             string[] file = Directory.GetFiles(this.path, "*.txt");
@@ -449,15 +449,19 @@ namespace MoogleEngine
             //rellenando...
             List<double> tfAux = new List<double>();
 
+            Dictionary<string,double> wordsIDF = new Dictionary<string,double> ();
+
             Dictionary<string,Dictionary<string,List<int>>> WordsAll = new Dictionary<string, Dictionary<string, List<int>>>();
 
             Dictionary<string,int> TextSize = new Dictionary<string, int>();
 
+            //Creando keys
             foreach(string cad in words)
             {
                 WordsAll.Add(cad, new Dictionary<string, List<int>>());
             }
 
+            //Armando posiciones para cada palabra en cada documento
             foreach(string f in file)
             {
                 string[] text = GetWordsFromString(System.IO.File.ReadAllText(f)).ToArray();
@@ -475,6 +479,16 @@ namespace MoogleEngine
                 }
             }
 
+            //Calculando IDF
+            foreach(var word in WordsAll)
+            {
+                //cantidad de docs en que esta
+                int cont = word.Value.Count;
+
+                wordsIDF.Add(word.Key, Math.Log(file.Length / cont));
+            }
+
+            //Llenando TF y Positions
             for (int i = 0; i < words.Length; i++)
             {
                 List<List<int>> Positions = new List<List<int>>();
@@ -507,7 +521,7 @@ namespace MoogleEngine
                 wordsTf.Add(words[i], TFaux);
             }
 
-            return (wordsTf, wordInf);
+            return (wordsTf, wordsIDF, wordInf);
         }
       
         public static int[] ConcatInt(int[] a, int[] b)

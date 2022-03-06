@@ -73,8 +73,11 @@ namespace MoogleEngine
          //diccionario de las posiciones y luego el path
          //mejoras necesarias: trabajar con los tf guardados en diccionary y si estoy pa eso guardar los tfidf por 
          //palabra y en el de tf solo poner la palabra con mas frecuencia por documento 
-        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route)
+        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route, Dictionary<string, List<double>> DictionaryForTF, Dictionary<string, double> DictionaryForIDF)
         {  
+            // System.Diagnostics.Stopwatch ccc = new System.Diagnostics.Stopwatch();
+            // ccc.Start();
+
             //variables necesarias para obtener score...
             double[] tfidf;
             Vector[] vectors = new Vector[file.Length];
@@ -101,7 +104,16 @@ namespace MoogleEngine
             for (int i = 0; i < words.Length; i++)
             {
                 //obteniendo los tfidf de cada palabra del documento para cada documento
-                tfidf = TFIDF(file,route, words[i], symbol);
+
+                List<double> lidf = new List<double>();
+
+                for(int j = 0 ; j < file.Length ; j++)
+                {
+                    lidf.Add(DictionaryForTF[words[i]][j] * DictionaryForIDF[words[i]]);
+                }
+
+                tfidf = lidf.ToArray();
+
                 for (int j = 0; j < mdt.GetLength(1); j++)
                 {
                     mdt[i, j] = tfidf[j];
@@ -178,16 +190,20 @@ namespace MoogleEngine
                 }
             }
 
-            // HelperMethods.MargeSortToListDouble(answer);
-
              answer.Sort((x,y) => y.Item1.CompareTo(x.Item1));
 
-            Console.WriteLine("*****************************************************");
-             foreach(var x in answer)
-             {
-                 Console.WriteLine(x.Item2 + " " + x.Item1);
-             }
-              Console.WriteLine("*****************************************************");
+            // Console.WriteLine("*****************************************************");
+            //  foreach(var x in answer)
+            //  {
+            //      Console.WriteLine(x.Item2 + " " + x.Item1);
+            //  }
+            //   Console.WriteLine("*****************************************************");
+
+            // Console.WriteLine("*****************************************************");
+
+            // Console.WriteLine(ccc.ElapsedMilliseconds);
+
+            // Console.WriteLine("*****************************************************");
 
             return answer;
 
