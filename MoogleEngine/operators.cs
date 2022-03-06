@@ -74,7 +74,7 @@ namespace MoogleEngine
         ///Función que determina las cercanias entre dos palabras dadas sus posiciones(para el operador "~")
         ///retorna las distancias más cortas por documento a partir de las palabras que se le da como imput.
         ///</summary>
-        public static List<(int closeness, string document)> Closeness(Symbol symbol,string route,  Dictionary<string, (string[] index1, List<int[]> index2)> positions)
+        public static List<(int closeness, string document)> Closeness(Symbol symbol,string route,  Dictionary<string, List<List<int>>> positions)
         {
            
             List<(string t1, string t2)> words = symbol.Closeness;
@@ -93,12 +93,12 @@ namespace MoogleEngine
             {
                 foreach (string file in files)
                 {
-                    int[] aux1 = positions[words[i].t1].index2[i];
-                    int[] aux2 = positions[words[i].t2].index2[i];
+                    List<int> aux1 = positions[words[i].t1][i];
+                    List<int> aux2 = positions[words[i].t2][i];
                     int min = int.MaxValue;
-                    for (int j = 0; j < aux1.Length; j++)
+                    for (int j = 0; j < aux1.Count; j++)
                     {
-                        for (int k = i + 1; k < aux2.Length; k++)
+                        for (int k = i + 1; k < aux2.Count; k++)
                         {
                             distance = Math.Abs(aux2[k] - aux1[j]);
                             min = Math.Min(distance, min);

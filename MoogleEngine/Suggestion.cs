@@ -100,7 +100,7 @@ namespace MoogleEngine
         ///funcion para encontrat la sugerencia a partur de las similitudes de las palabras que tenemos en 
         ///los documentos con en query ingresado.
         ///</summary>
-        public string suggestionForQuery( Dictionary<string, (string[], List<int[]>)> dictionary)
+        public string suggestionForQuery( Dictionary<string,  List<List<int>>> dictionary)
         {
             Suggestion sgt=new Suggestion(this.query);
             string[] words=query.Split(' ');

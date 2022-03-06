@@ -120,7 +120,7 @@ namespace MoogleEngine
 
     public double CosVector(Vector v)
     {
-        return EscalarProduct(v) / (this.Norma() * v.Norma());
+        return EscalarProduct(v) / (this.Norma() * v.Norma() + 1e-9);
     }
 
     }

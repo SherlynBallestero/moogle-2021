@@ -73,7 +73,7 @@ namespace MoogleEngine
          //diccionario de las posiciones y luego el path
          //mejoras necesarias: trabajar con los tf guardados en diccionary y si estoy pa eso guardar los tfidf por 
          //palabra y en el de tf solo poner la palabra con mas frecuencia por documento 
-        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, (string[] index1, List<int[]> index2)> positions, string route)
+        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route)
         {  
             //variables necesarias para obtener score...
             double[] tfidf;
@@ -86,10 +86,17 @@ namespace MoogleEngine
             string[] filesName = new string[file.Length];
             List<(double, string)> answer = new List<(double, string)>();
             //reformar esto....
-            string[] words = HelperMethods.WordsInCollection(route);
+            string[] words = new string[positions.Count];
             double[] queryForVector = new double[words.Length];
             double[,] mdt = new double[words.Length, file.Length];
             double[] auxDouble = new double[words.Length];
+            //pasando las palabras a words
+            int ind=-1;
+            foreach(string keys in positions.Keys)
+            {
+                ind++;
+                words[ind]=keys;
+            }
 
             for (int i = 0; i < words.Length; i++)
             {
@@ -171,7 +178,17 @@ namespace MoogleEngine
                 }
             }
 
-            HelperMethods.MargeSortToListDouble(answer);
+            // HelperMethods.MargeSortToListDouble(answer);
+
+             answer.Sort((x,y) => y.Item1.CompareTo(x.Item1));
+
+            Console.WriteLine("*****************************************************");
+             foreach(var x in answer)
+             {
+                 Console.WriteLine(x.Item2 + " " + x.Item1);
+             }
+              Console.WriteLine("*****************************************************");
+
             return answer;
 
         }
