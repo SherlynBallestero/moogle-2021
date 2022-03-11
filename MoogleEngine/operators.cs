@@ -18,56 +18,68 @@ namespace MoogleEngine
         /// (3)~ >Palabras a las que le corresponde calcular la cercania.
         ///Ademas nos aporta con una variable por referencia la devolucion de un query limpio(sin operadores)
         ///</summary>
-        public static (Symbol symbol,string[] pharse) GetSymbol(string query,string route)
+        public static Symbol GetSymbol(string query,string route)
         {
-           // string[] phrase = query.Split(' ');
-            string[] words = query.Split(' ');
-            //para saber a cual palabra ya sin los operadores corresponde la palabra del query que se analiza
-            int count = -1;
-            char[] Symbol = { '!', '^', '*', '~' };
+            Operator Op = new Operator(query);
+
             string yes = " ";
             string no = " ";
+
             List<(string, string)> Closeness = new List<(string, string)>();
             Dictionary<string, int> asterisks = new Dictionary<string, int>();
-            foreach (string word in words)
+
+            foreach(var x in Op.MustExistWords)
             {
-                count++;
-                for (int i = 0; i < word.Length; i++)
-                {
-                    if (word[i] == Symbol[0])
-                    {
-                        no += word + " ";
-                        break;
-                    }
-                    else if (word[i] == Symbol[1])
-                    {
-                        yes += word + " ";
-                        break;
-                    }
-                    else if (word[i] == Symbol[2])
-                    {
-                        //implementar cuenta asteriscos
-                        //count= CountAsterisks(word);
-                       if (!asterisks.ContainsKey(words[count]))
-                         asterisks.Add(words[count], CountAsterisks(word));
+                yes += x + " ";
+            }
 
-                    }
-                }
-                if (word == Symbol[3].ToString())
-                {
-                    Closeness.Add((words[count - 2], words[count + 1]));
+            foreach(var x in Op.MustNotExistWords)
+            {
+                no += x + " ";
+            }
 
+            foreach(var x in Op.PairWords)
+            {
+                Closeness.Add((x.Item1, x.Item2));
+            }
+            
+            foreach(var x in Op.ImportanceWords)
+            {
+                if(x.Value != 0)
+                {
+                    asterisks.Add(x.Key, x.Value);
                 }
             }
-            //para evitar que sean null si no hay palabras afectadas por ^ y !
+
             if(yes==" ")yes="notElements";
             if(no==" ")no="notElements";
             if(Closeness.Count==0)Closeness.Add(("notElements","notElements"));
             if(asterisks.Count==0)asterisks.Add("notElements",-1);
 
-            (string[] t1, string[] t2) banDocs = (HelperMethods.TokenWords(yes), HelperMethods.TokenWords(yes));
+            string[] ttt1 = new string[]{};
+            string[] ttt2 = new string[]{};
+
+            if(yes != "notElements")
+            {
+                ttt1 = WordInformation.GetWordsFromString(yes).ToArray();
+            }
+            else
+            {
+                ttt1 = new string[]{"notElements"};
+            }
+
+            if(no != "notElements")
+            {
+                ttt2 = WordInformation.GetWordsFromString(no).ToArray();
+            }
+            else
+            {
+                ttt2 = new string[]{"notElements"};
+            }
+
+            (string[] t1, string[] t2) banDocs = (ttt1, ttt2);
             Symbol answer = new Symbol(banDocs, asterisks, Closeness);
-            return (answer,words);
+            return answer;
         }
 
         ///<summary>
@@ -117,9 +129,9 @@ namespace MoogleEngine
         ///<summary>
         ///Metodo para obtener los documentos que se vetaran,asi poder satisfascer las condiciones de los operadores ! y ^
         ///</summary>
-        public static List<string> BanDocuments(Symbol symbol,string route)
+        public static List<string> BanDocuments(Symbol symbol,string route,Dictionary<string,List<List<int>>> positions)
         {
-            List<string> answer=new List<string>();
+            List<string> answer = new List<string>();
            //// HelperMetods hM = new HelperMetods(this.path);
             string[] files = Directory.GetFiles(route, "*.txt");
             bool[] marks = new bool[files.Length];
@@ -128,68 +140,40 @@ namespace MoogleEngine
             (string[] yes, string[] no) b = symbol.banDocs;
             string[] yes = b.yes;
             string[] no = b.no;
-            int y = 0;
-            int n = 0;
-            for(int i=0;i<marks.Length;i++)
-                marks[i]=true;
-            bool indexYes=true;
-            bool indexNo=true;
-            if (yes[0] != "notElements" && no[0] != "notElements")
+            //revisamos enntre las posiciones d elas palabras de yes y no que tenemos por documento y asi en dependencia de si la queremos o no la
+            //la marcamos en true cuando no la queremos entre los documentos de retorno en la busqueda. 
+            if(yes[0] != "notElements")
             {
-                while (y < yes.Length || n < no.Length)
+                for(int i = 0 ; i < files.Length ; i++)
                 {
-                    for (int i = 0; i < files.Length; i++)
+                    foreach(var x in yes)
                     {
-                        if (y < yes.Length)
+                        if(positions[x][i][0] == -1)
                         {
-                            if (!HelperMethods.Find(yes[y], files[i]))
-                            {
-                                indexYes = false;
-                            }
+                            marks[i] = true;
                         }
-                        if (n < no.Length)
-                        {
-                            if (HelperMethods.Find(no[n], files[i]))
-                            {
-                                indexNo = false;
-                            }
+                    }
+                }
+            }
 
+            if(no[0] != "notElements")
+            {
+                for(int i = 0 ; i < files.Length ; i++)
+                {
+                    foreach(var x in no)
+                    {
+                        if(positions[x][i][0] != -1)
+                        {
+                            marks[i] = true;
                         }
-                        if (!indexNo || !indexYes) marks[i] = false;
                     }
-                    y++; n++;
                 }
             }
-            else if(yes[0] == "notElements" && no[0] != "notElements")
-            {
-                while ( n < no.Length)
-                {
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        if (HelperMethods.Find(no[n], files[i]))
-                            marks[i]=false;
-                            
-                    }
-                    n++;
-                }
-            }
-            else if(yes[0] != "notElements" && no[0] == "notElements")
-            {
-                while ( y < yes.Length)
-                {
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        if (!HelperMethods.Find(yes[y], files[i]))
-                            marks[i]=false;
-                            
-                    }
-                    y++;
-                }
-            }
+
             //marks va a ser falso en i cuando vetamos al documento en la posicion i.
             for(int i=0;i<marks.Length;i++)
             {
-                if(!marks[i])answer.Add(files[i]);
+                if(marks[i])answer.Add(files[i]);
             }
             if(answer is null)answer.Add("notElements");
             return answer;

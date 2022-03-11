@@ -13,7 +13,7 @@ namespace MoogleEngine
         public WordInformation(string path)
         {
             if (path == null)
-                throw new ArgumentException("The imput path can't be null");
+                throw new ArgumentException("The input path can't be null");
             this.path = path;
         }
 
@@ -177,19 +177,19 @@ namespace MoogleEngine
             for (int i = 0; i < file.Length; i++)
             {
                 string line = System.IO.File.ReadAllText(file[i]);
-               // aux = TokenWords(line);
+                // aux = TokenWords(line);
 
                 List<string> aux = GetWordsFromString(line);
 
-                foreach(var x in aux)
+                foreach (var x in aux)
                 {
                     hs.Add(x);
                 }
             }
 
             List<string> words = new List<string>();
-            
-            foreach(var x in hs)
+
+            foreach (var x in hs)
             {
                 words.Add(x);
             }
@@ -213,19 +213,19 @@ namespace MoogleEngine
         {
             score scr = new score();
             string[] allWordsInDocument = WordsInDocuments(document);
-            allWordsInDocument=WordInformation.NullDelet(allWordsInDocument);
-            List<int> answer = new List<int>(); 
+            allWordsInDocument = WordInformation.NullDelet(allWordsInDocument);
+            List<int> answer = new List<int>();
             if (scr.TF(word, document) == 0)
             {
                 answer.Add(-1);
                 return answer;
-            } 
-            
+            }
+
             for (int i = 0; i < allWordsInDocument.Length; i++)
             {
                 if (allWordsInDocument[i] == word)
                 {
-                   answer.Add(i);
+                    answer.Add(i);
                 }
             }
             return answer;
@@ -233,166 +233,92 @@ namespace MoogleEngine
         ///<summary>
         ///Devuelve un segmento de codigo de determinado documento
         ///</summary>
-        public static string snippetForASpecificDocument(string[] documents,string[] queryWords, Dictionary<string, List<List<int>>> dictionary, string pathToDocument, Symbol symbol)
-        {//Nota:**asegurarme de pasar el query limpio**
+        public static string snippetForASpecificDocument(string[] documents, string[] queryWords, Dictionary<string, List<List<int>>> dictionary, string pathToDocument, Symbol symbol, string[] filesname, Dictionary<string, List<double>> DictionaryForTF,Dictionary<string, double> DictionaryForIDF)
+        {
             int maxlarge = 40;
             int minlarge = 15;
-           int[] aux = new int[2];
-            string[] text = File.ReadAllText(pathToDocument).Split();
-            //se utiliza el dictionary para obtener los documentos
+            int[] aux = new int[2];
+            string[] text =  GetWordsFromString(File.ReadAllText(pathToDocument)).ToArray();
             int index = 0;
             List<string> MostValueWords = new List<string>();
             List<double> ValueForWords = new List<double>();
-            //para cuando el query tiene solo una palabra
-           if(queryWords.Length==1)
-           {
-               //no se va a verificar si se encuentra porque si es solo un termino y el dictionario de posiciones no la
-               // contiene nunca entra a crear el snippet y devuelve una la sugerencia. 
-               int pos=dictionary.ContainsKey(queryWords[0])?dictionary[queryWords[0]][index][0]:0;
-                pos=pos-5>=0?pos-5:0;
-                int end=pos+30<text.Length?end=pos+30:text.Length;
-                return string.Join(" ",text[pos..end]);
-           }
-           
+
             //buscando cual es el indice correspondiente al documento para ubicarse en el diccionary a cual 
             //conjunto de posiciones acceder.
-            for (int i = 0; i < documents.Length; i++)
+            for (int i = 0; i < filesname.Length; i++)
             {
-                if (documents[i] == pathToDocument)
+                if (filesname[i] == pathToDocument)
                 {
                     index = i;
                     break;
                 }
             }
-            //para tener en cuenta las palabras mas relevantes del cuery en este documento
-            foreach (string word in queryWords)
-            {
-                //obteniendo el valor de la palabra para el documento
-                ValueForWords.Add(score.TFIDF(documents,pathToDocument, word, symbol)[index]);
-            }
-            //dados los valores por cada palabra del query se toman las mejores valoradas.
-            double[] values = new double[ValueForWords.Count];
-            ValueForWords.CopyTo(0, values, 0, ValueForWords.Count - 1);
-            Array.Sort(values);
-            //que palabra tiene mayor valor?
-            for (int i = 0; i < 2; i++)
-            {   if(values.Length<2 && i==1)break;
-                for (int j = 0; j < ValueForWords.Count; j++)
-                {
-                    //en values tenemos los valores ordenados de mayor a 
-                    //menor,se espera obtener ahora a que palabras les corresponde los mayores valores
-                    //las localizamos dadas la lista no ordenada ya que en el indice j se encuentra el indice 
-                    //correspondiente a la palabra a la que se le asigna dicho valor.
-                    if (values[i] - ValueForWords[j]<0.000001) MostValueWords.Add(queryWords[j]);
-                }
-            }
-            string bestQuery1 = MostValueWords.Count>0? MostValueWords[0]:"-";
-            string bestQuery2 = MostValueWords.Count>0? MostValueWords[1]:"-";
-            string[] bestQuery={bestQuery1,bestQuery2};
 
-            //aqui se asumio q con las dos mejores palabras bastaban pero esta sujeto a cambio
-            //obteniendo un array con todas las posiciones de todas las palabras del query en el documento dado.
-            for (int i = 0; i < queryWords.Length; i++)
-            {
-                if(dictionary.ContainsKey(queryWords[i]))
-                    aux = ConcatInt(dictionary[queryWords[i]][index].ToArray(), aux);
-            }
-
-            Array.Sort(aux);//ordena de menor a mayor
-            //buscando el subconjunto de menor distancia al que pertenecen todas las palabras del query.
-            int min = int.MaxValue;
-            int lowerEnd = 0;
-            int topEnd = 0;
-           
-            //este boolean dira si entramos en el caso en el que las dos palabras con mas 
-            //valor estan extremadamente separadas
-            ///////revisar que esto no me de error
-            bool extremeSeparation = false;
+            int pos = 0, end = 0;
             
-
-            for (int i = 0; i < aux.Length; i++)
+            //para cuando el query tiene solo una palabra
+            if (queryWords.Length == 1)
             {
-                for (int j = i + queryWords.Length; j < aux.Length; j++)
-                {
 
-                    if (SubsetContent(aux[i], aux[j], queryWords, dictionary, index))
+                //no se va a verificar si se encuentra porque si es solo un termino y el dictionario de posiciones no la
+                // contiene nunca entra a crear el snippet y devuelve una la sugerencia. 
+                
+                if(dictionary.ContainsKey(queryWords[0]))pos = dictionary[queryWords[0]][index][0];
+                else pos = 0;
+
+                if(pos - 5 >= 0)pos = pos - 5;
+                else pos = 0;
+
+                if(pos + 30 < text.Length)end = pos + 30;
+                else end = text.Length;
+
+                return string.Join(" ", text[pos..end]);
+            }
+
+            double tfidf = double.MinValue;
+
+            string cad = "";
+
+            //Iterando por las palabras de la query
+            foreach(var x in queryWords)
+            {   
+                if(dictionary.ContainsKey(x) && dictionary[x][index][0] != -1)
+                {
+                    double temp = DictionaryForTF[x][index] * DictionaryForIDF[x];
+                    if(tfidf < temp)
                     {
-                        min = Math.Min(aux[j] - aux[i], min);
-                        lowerEnd = aux[i];
-                        topEnd = aux[j];
+                        tfidf = temp;
+                        cad = x;
                     }
                 }
             }
-            //tomando en el array documento un segmento adecuado se construye a partir del array
-            //priemro se ajusta el espacio que se tomara
-            if ((topEnd - lowerEnd) > maxlarge)
-            {
-                if (SubsetContent(lowerEnd, topEnd / 2, bestQuery, dictionary, index) && (topEnd / 2 - lowerEnd) <= maxlarge + 15)
-                {
-                    topEnd = topEnd / 2;
-                }
-                else if (SubsetContent(lowerEnd + lowerEnd / 2, topEnd, bestQuery, dictionary, index) && (topEnd / 2 - (lowerEnd + lowerEnd / 2)) <= maxlarge + 15)
-                {
-                    lowerEnd = lowerEnd + lowerEnd / 2;
-                }
-                else
-                {
-                    // en este caso tomamos dos conjuntos separados con las dos palabras mas importantes del query
-                    extremeSeparation = true;
-                    //entonces tomamos dos subconjuntos de tamaño aceptable que tome a las dos palabras mas imp del query 
-                }
-            }
-            else if ((topEnd - lowerEnd) < minlarge)
-            {
-                if (topEnd + minlarge / 2 < text.Length)
-                {
-                    topEnd = topEnd + minlarge / 2;
-                }
-                if (lowerEnd - minlarge / 2 > 0)
-                {
-                    lowerEnd = lowerEnd - minlarge / 2;
-                }
-            }
-            //ahora se tomara el texto a devolver
-            string answer = "";
-            //para caso extremo de separacion
-            string answer2 = "";
-            if (extremeSeparation)
-            {
-                //que necesitamos
-                 //posiciones de las dos palabras mas importantes en el documento(dos randoms)
-                 int mostImpWordPosition1 = dictionary[bestQuery1][index][0]>=0?dictionary[bestQuery1][index][0]:0;
-                 int mostImpWordPosition2=0;
-                
-                 if(dictionary.ContainsKey(bestQuery2))
-                {
-                     mostImpWordPosition2 = dictionary[bestQuery2][index][0];
-                }
-          
-               //para caso extremo decidimos estos bordes
-                int lowerbound1 = mostImpWordPosition1;
-                int upperbound1 = mostImpWordPosition1 + minlarge;
-                int lowerbound2 = mostImpWordPosition2 - minlarge>=0?mostImpWordPosition2 - minlarge:0;
-                int upperbound2 = mostImpWordPosition2;
-                if(Math.Max(lowerbound1,0) < Math.Min(upperbound1, text.Length))answer += string.Join(" ",text[Math.Max(lowerbound1,0)..Math.Min(upperbound1, text.Length)]);
-              //  if (lowerbound2 >=0 && upperbound2 >= 0) answer+="(...)" + string.Join(" ",text[lowerbound2..upperbound2]);
-            }
-            else
-            {
 
-                answer=string.Join(" ",text[Math.Max(lowerEnd,0)..Math.Min(topEnd, text.Length)]);
+            if(tfidf == double.MinValue)
+            {
+                return string.Join(" ", text[0..(Math.Min(30, text.Length))]);
             }
-            return answer;
+                
+            if(dictionary.ContainsKey(cad))pos = dictionary[cad][index][0];
+            else pos = 0;
+
+            if(pos - 5 >= 0)pos = pos - 5;
+            else pos = 0;
+
+            if(pos + 30 < text.Length)end = pos + 30;
+            else end = text.Length;
+
+            return string.Join(" ", text[pos..end]);
+            
         }
         ///<summary>
         ///Devuelve un segmento de codigo para cada documento
         ///</summary>
-        public static string[] snippet(string[] query, Dictionary<string, List<List<int>>> dictionary, string[] files, Symbol symbol)
+        public static string[] snippet(string[] query, Dictionary<string, List<List<int>>> dictionary, string[] files, Symbol symbol, string[] filesname, Dictionary<string, List<double>> DictionaryForTF,Dictionary<string, double> DictionaryForIDF)
         {
-            string[] answer=new string[files.Length];
-            for(int i=0;i<files.Length;i++)
+            string[] answer = new string[files.Length];
+            for (int i = 0; i < files.Length; i++)
             {
-                answer[i]=snippetForASpecificDocument(files,query,dictionary,files[i],symbol);
+                answer[i] = snippetForASpecificDocument(files, query, dictionary, files[i], symbol, filesname,DictionaryForTF,DictionaryForIDF);
             }
             return answer;
         }
@@ -403,15 +329,15 @@ namespace MoogleEngine
 
             StringBuilder word = new StringBuilder();
 
-            for(int i = 0 ; i < cad.Length ; i++)
+            for (int i = 0; i < cad.Length; i++)
             {
-                if(Char.IsLetterOrDigit(cad[i]))
+                if (Char.IsLetterOrDigit(cad[i]))
                 {
                     word.Append(cad[i]);
                 }
                 else
                 {
-                    if(word.Length > 0)
+                    if (word.Length > 0)
                     {
                         vect.Add(word.ToString().ToLower());
                         word.Clear();
@@ -419,7 +345,7 @@ namespace MoogleEngine
                 }
             }
 
-            if(word.Length > 0)
+            if (word.Length > 0)
             {
                 vect.Add(word.ToString().ToLower());
                 word.Clear();
@@ -427,7 +353,7 @@ namespace MoogleEngine
 
             return vect;
         }
-        
+
         ///<summary>
         ///Rellenar dos diccionarios y devuelve un diccionario que lleva por cada palabra q existe referente a cada
         /// documento la frecuencia de dada palabra para cada documento y otro que por cada documento almacena las
@@ -442,35 +368,35 @@ namespace MoogleEngine
 
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento el tf de esa palabra en
             // ese documento.
-            Dictionary<string,List<double>> wordsTf = new Dictionary<string,List<double>> ();
+            Dictionary<string, List<double>> wordsTf = new Dictionary<string, List<double>>();
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento las posiciones en que
             // encontramos dicha palabra.
-            Dictionary<string, List<List<int>>> wordInf = new  Dictionary<string, List<List<int>>>();
+            Dictionary<string, List<List<int>>> wordInf = new Dictionary<string, List<List<int>>>();
             //rellenando...
             List<double> tfAux = new List<double>();
 
-            Dictionary<string,double> wordsIDF = new Dictionary<string,double> ();
+            Dictionary<string, double> wordsIDF = new Dictionary<string, double>();
 
-            Dictionary<string,Dictionary<string,List<int>>> WordsAll = new Dictionary<string, Dictionary<string, List<int>>>();
+            Dictionary<string, Dictionary<string, List<int>>> WordsAll = new Dictionary<string, Dictionary<string, List<int>>>();
 
-            Dictionary<string,int> TextSize = new Dictionary<string, int>();
+            Dictionary<string, int> TextSize = new Dictionary<string, int>();
 
             //Creando keys
-            foreach(string cad in words)
+            foreach (string cad in words)
             {
                 WordsAll.Add(cad, new Dictionary<string, List<int>>());
             }
 
             //Armando posiciones para cada palabra en cada documento
-            foreach(string f in file)
+            foreach (string f in file)
             {
                 string[] text = GetWordsFromString(System.IO.File.ReadAllText(f)).ToArray();
 
                 TextSize.Add(f, text.Length);
 
-                for(int i = 0 ; i < text.Length ; i++)
+                for (int i = 0; i < text.Length; i++)
                 {
-                    if(WordsAll[text[i]].ContainsKey(f) == false)
+                    if (WordsAll[text[i]].ContainsKey(f) == false)
                     {
                         WordsAll[text[i]].Add(f, new List<int>());
                     }
@@ -480,7 +406,7 @@ namespace MoogleEngine
             }
 
             //Calculando IDF
-            foreach(var word in WordsAll)
+            foreach (var word in WordsAll)
             {
                 //cantidad de docs en que esta
                 int cont = word.Value.Count;
@@ -497,15 +423,15 @@ namespace MoogleEngine
 
                 foreach (string f in file)
                 {
-                    if(WordsAll[words[i]].ContainsKey(f) == false)
+                    if (WordsAll[words[i]].ContainsKey(f) == false)
                     {
-                        Positions.Add(new List<int>(){-1});
+                        Positions.Add(new List<int>() { -1 });
                         TFaux.Add(0);
-                    }   
+                    }
                     else
                     {
                         Positions.Add(WordsAll[words[i]][f]);
-                        if(TextSize[f] == 0)
+                        if (TextSize[f] == 0)
                         {
                             TFaux.Add(0);
                         }
@@ -515,7 +441,7 @@ namespace MoogleEngine
                         }
                     }
                 }
-                
+
                 wordInf.Add(words[i], Positions);
 
                 wordsTf.Add(words[i], TFaux);
@@ -523,7 +449,7 @@ namespace MoogleEngine
 
             return (wordsTf, wordsIDF, wordInf);
         }
-      
+
         public static int[] ConcatInt(int[] a, int[] b)
         {
             int[] concated = new int[a.Length + b.Length];
@@ -565,7 +491,7 @@ namespace MoogleEngine
         {
             foreach (string word in queryWords)
             {
-                if(dictionary.ContainsKey(word))
+                if (dictionary.ContainsKey(word))
                     if (!IsInSet(dictionary[word][documentIndex].ToArray(), lowerEnd, topEnd)) return false;
             }
             return true;

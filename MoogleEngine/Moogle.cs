@@ -1,4 +1,9 @@
-﻿namespace MoogleEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace MoogleEngine;
 
 
 public class Moogle
@@ -32,25 +37,91 @@ public class Moogle
          //guardar diccionary positions
          DictionaryWork.SaveDictionaryPosition(DictionaryForPositions);
         //recoger diccionario de posiciones
-         DictionaryForPositions=DictionaryWork.TekeDictionaryPosition();
+       ///  DictionaryForPositions=DictionaryWork.TekeDictionaryPosition();
 
         //dictionary de sinonimos
         sinonymous = DictionaryWork.TekeDictionarySyn();
     }
 
+    public static List<Tuple<string,int>> GetWordsAndPositionsFromString(string cad)
+    {
+        List<Tuple<string,int>> vect = new List<Tuple<string,int>>();
+
+        int last = -1;
+        StringBuilder word = new StringBuilder();
+
+        for(int i = 0 ; i < cad.Length ; i++)
+        {
+            if(Char.IsLetterOrDigit(cad[i]))
+            {
+                if(word.Length == 0)last = i;
+                word.Append(cad[i]);
+            }
+            else
+            {
+                if(word.Length > 0)
+                {
+                    vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
+                    last = -1;
+                    word.Clear();
+                }
+            }
+        }
+
+        if(word.Length > 0)
+        {
+            vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
+            last = -1;
+            word.Clear();
+        }
+
+        return vect;
+    }
+
+    public static string FixQueryWithNewWords(string query, List<string> vect)
+    {
+        List<Tuple<string,int>> arr = GetWordsAndPositionsFromString(query);
+
+        for(int i = arr.Count-1 ; i >= 0 ; i--)
+        {
+            query = query.Remove(arr[i].Item2, arr[i].Item1.Length);
+            query = query.Insert(arr[i].Item2, vect[i]);
+        }
+
+        return query;
+    }
+
+     public static string WordListToString(List<string> vect)
+    {
+        StringBuilder cad = new StringBuilder();
+
+        for(int i = 0 ; i < vect.Count ; i++)
+        {
+            if(i > 0)cad.Append(" ");
+            cad.Append(vect[i]);
+        }
+
+        return cad.ToString();
+    }
+
     //metodo para devolver los item de busqueda
     public static SearchResult Query(string query)
     {
+        List<string> lst= WordInformation.GetWordsFromString(query);
+
+        string tempcad = WordListToString(lst);
+
         //hallando una sugerencia para el query.
-        Suggestion sgt = new Suggestion(query);
+        Suggestion sgt = new Suggestion(tempcad);
         string suggestion = sgt.suggestionForQuery(DictionaryForPositions);
 
         //...operadores...
         //obteniendo symbol para trabajar con los operadores.
-        Symbol symbol = operators.GetSymbol(query, path).symbol;
+        Symbol symbol = operators.GetSymbol(query, path);
         //obteniendo array de palabras del query sin operadores
        // string[] newQuery = operators.GetSymbol(query, path).pharse;
-       string[] newQuery = suggestion.Split(' ');
+       
+        string[] newQuery = HelperMethods.NullDelet(suggestion.Split());
         //obteniendo lista con las distancias mas cercanas de las posiciones de las palabras afectadas por el operador"~"
         List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
         //lista de score por nombre de documento ordenados de mayor a menor
@@ -65,12 +136,12 @@ public class Moogle
             DocumentsInOrder[i] = scores[i].Item2;
         }
         //cacho de codigo por documento
-        string[] snippet = WordInformation.snippet(newQuery, DictionaryForPositions, DocumentsInOrder, symbol);
+        string[] snippet = WordInformation.snippet(newQuery, DictionaryForPositions, DocumentsInOrder, symbol, filesPath, DictionaryForTF, DictionaryForIDF);
 
-        SearchItem[] items = new SearchItem[3];
-        for (int i = 0; i < 3; i++)
+        SearchItem[] items = new SearchItem[Math.Min(3, snippet.Length)];
+        for (int i = 0; i < Math.Min(3, snippet.Length); i++)
         {
-            items[i] = new SearchItem(scores[i].Item2, snippet[i], (float)scores[i].Item1);
+            items[i] = new SearchItem(scores[i].Item2 + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1);
 
         }
         return new SearchResult(items, suggestion);

@@ -116,7 +116,15 @@ namespace MoogleEngine
 
                 for (int j = 0; j < mdt.GetLength(1); j++)
                 {
-                    mdt[i, j] = tfidf[j];
+                    if(symbol.asterisks.ContainsKey(words[i]))
+                    {
+                         mdt[i, j] = tfidf[j] * Math.Pow(2, symbol.asterisks[words[i]]);
+                    }
+                    else
+                    {
+                         mdt[i, j] = tfidf[j];
+                    }
+                   
                 }
                 //obteniendo el vector correspondiente al query
                 if (HelperMethods.FindInArray(queryGuide, words[i]))
@@ -148,19 +156,28 @@ namespace MoogleEngine
             }
            
             //no se agregan a la solución los documentos vetados
-            List<string> BanDocuments = operators.BanDocuments(symbol,route);
+            List<string> BanDocuments = operators.BanDocuments(symbol,route,positions);
             if (BanDocuments.Count!=0)
             {
-                for (int i = 0, j = 0; i < cosin.Length; i++)
+                for (int i = 0; i < cosin.Length; i++)
                 {
+                    int j = 0;
+
+                    bool flag = true;
+
                     while (j < BanDocuments.Count)
                     {
-                        if (BanDocuments[j] != file[i])
+                        if (BanDocuments[j] == file[i])
                         {
-                            //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
-                            answer.Add((cosin[i], file[i]));
+                            flag = false;
                         }
                         j++;
+                    }
+
+                    if(flag)
+                    {
+                        //agregamos a la solucion los documentos que no esten vetados con sus respectivos path.
+                        answer.Add((cosin[i], file[i]));
                     }
                 }
             }
@@ -171,39 +188,55 @@ namespace MoogleEngine
                    answer.Add((cosin[i], file[i]));
                 }
             }
-            //Se aumenta el score de los doc que tienen a las palabras que se encuentran cerca afectados por el operador ~
-            //primero se verifica si hay palabras afectadas por este operador se aumenta el score en un  20% del 25% de los  documentos 
-            //con mejores resultados de cercanía dadas las condiciones del operador.
-            double increment = 5 / 10;
-            if (Closeness[0].document != "notElements")
+
+            Dictionary<string, int> mp = new Dictionary<string, int>();
+
+            if(symbol.Closeness[0] != ("notElements", "notElements"))
             {
-                int indexAux = 0;
-                while (indexAux <= answer.Count/4)
+                for(int i = 0 ; i < file.Length ; i++)
                 {
-                    for (int i = 0; i < answer.Count; i++)
+                    mp.Add(file[i], 0);
+
+                    foreach(var x in symbol.Closeness)
                     {
-                        if (answer[i].Item2 == Closeness[indexAux].document)
+                        List<(int, int)> lst = new List<(int, int)>();
+
+                        foreach(var p1 in positions[x.Item1][i])
                         {
-                            answer[i]= (answer[i].Item1 * increment,answer[i].Item2);
+                            if(p1 != -1)lst.Add((p1, 1));
+                        }
+
+                        foreach(var p2 in positions[x.Item2][i])
+                        {
+                            if(p2 != -1)lst.Add((p2, 2));
+                        }
+
+                        lst.Sort((x,y) => y.Item1.CompareTo(x.Item1));
+
+                        for(int k = 1 ; k < lst.Count ; k++)
+                        {
+                            if(lst[k].Item2 != lst[k-1].Item2 && Math.Abs(lst[k].Item1 - lst[k-1].Item1) < 10)
+                            {
+                                mp[file[i]]++;
+                            }
                         }
                     }
                 }
             }
 
+            for(int i = 0 ; i < answer.Count ; i++)
+            {
+                if(mp.ContainsKey(answer[i].Item2))
+                {
+                    answer[i] = (answer[i].Item1 * (Math.Log(mp[answer[i].Item2]+1)+1), answer[i].Item2);
+                }
+            }
+
+            
+
              answer.Sort((x,y) => y.Item1.CompareTo(x.Item1));
 
-            // Console.WriteLine("*****************************************************");
-            //  foreach(var x in answer)
-            //  {
-            //      Console.WriteLine(x.Item2 + " " + x.Item1);
-            //  }
-            //   Console.WriteLine("*****************************************************");
-
-            // Console.WriteLine("*****************************************************");
-
-            // Console.WriteLine(ccc.ElapsedMilliseconds);
-
-            // Console.WriteLine("*****************************************************");
+         
 
             return answer;
 
