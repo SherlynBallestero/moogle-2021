@@ -23,7 +23,7 @@ namespace MoogleEngine
         public static Dictionary<string, List<List<int>>> TekeDictionaryPosition()
         {
             string path = Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "DictionaryPositions", "DicctionaryPositions.json");
-            Console.WriteLine("Direccion de recogida" + path);
+            //Console.WriteLine("Direccion de recogida" + path);
             Dictionary<string, List<List<int>>> DictionaryForPositions = new Dictionary<string, List<List<int>>>();
             return DictionaryForPositions = JsonSerializer.Deserialize<Dictionary<string, List<List<int>>>>(json: File.ReadAllText(path)) ?? throw new Exception();
         }
@@ -34,6 +34,18 @@ namespace MoogleEngine
             string path = Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "DictionaryPositions", "DicctionaryPositions.json");
             
             File.WriteAllText(path, JsonSerializer.Serialize(DictionaryForPositions));
+        }
+
+        public static void SaveFileNames(List<string> names){
+            string path = Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "FileNames", "FileNames.json");
+            File.WriteAllText(path, JsonSerializer.Serialize(names));
+        }
+
+        public static List<string> TakeFileNames(){
+            string path = Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "FileNames", "FileNames.json");
+            List<string> names = new List<string>();
+            return names = JsonSerializer.Deserialize<List<string>>(json: File.ReadAllText(path)) ?? throw new Exception();
+
         }
     }
 }

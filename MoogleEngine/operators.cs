@@ -148,9 +148,11 @@ namespace MoogleEngine
                 {
                     foreach(var x in yes)
                     {
-                        if(positions[x][i][0] == -1)
-                        {
-                            marks[i] = true;
+                        if(positions.ContainsKey(x)){
+                            if(positions[x][i][0] == -1)
+                            {
+                                marks[i] = true;
+                            }
                         }
                     }
                 }
@@ -162,9 +164,11 @@ namespace MoogleEngine
                 {
                     foreach(var x in no)
                     {
-                        if(positions[x][i][0] != -1)
-                        {
-                            marks[i] = true;
+                        if(positions.ContainsKey(x)){
+                            if(positions[x][i][0] != -1)
+                            {
+                                marks[i] = true;
+                            }
                         }
                     }
                 }

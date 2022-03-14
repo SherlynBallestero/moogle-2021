@@ -26,11 +26,11 @@ public class Moogle
         filesNames = Directory.GetFileSystemEntries(path);
         //obtener direcciones hacia los archivos contenidos en la coleccion
         filesPath = Directory.GetFiles(path, "*txt");
+        // Comprobando cambios en la carpeta contents
+      //  List<string> names = DictionaryWork.TakeFileNames();
 
         //Obteniendo Dictionary con todas las palabras de la coleccion de documentos y sus 
-        //respectivas posiciones por documento
-
-        //Obteniendo Dictionary con todas las palabras de la coleccion y sus 
+        //respectivas posiciones por documento y dictionary con todas las palabras de la coleccion y sus 
         // frecuencias por documento(convertir en tfidf)
         (DictionaryForTF, DictionaryForIDF, DictionaryForPositions) = wordInfo.FillDictionary();
 
@@ -138,13 +138,18 @@ public class Moogle
         //cacho de codigo por documento
         string[] snippet = WordInformation.snippet(newQuery, DictionaryForPositions, DocumentsInOrder, symbol, filesPath, DictionaryForTF, DictionaryForIDF);
 
-        SearchItem[] items = new SearchItem[Math.Min(3, snippet.Length)];
+        //SearchItem[] items = new SearchItem[Math.Min(3, snippet.Length)];
+        List<SearchItem> items = new List<SearchItem>();
         for (int i = 0; i < Math.Min(3, snippet.Length); i++)
         {
-            items[i] = new SearchItem(scores[i].Item2 + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1);
+            if (scores[i].Item1 > 0){
+                items.Add(new SearchItem(scores[i].Item2 + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1));
+            }
+            
 
         }
-        return new SearchResult(items, suggestion);
+        SearchItem[] items1 = items.ToArray();
+        return new SearchResult(items1, suggestion);
 
             // SearchItem[] items1111 = new SearchItem[1] {
             //  new SearchItem("Not Found", "Not Found", 0.9f)};
