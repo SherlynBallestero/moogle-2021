@@ -322,6 +322,11 @@ namespace MoogleEngine
             }
             return answer;
         }
+         ///<summary>
+        ///Devuelve una lista a partir de un string pero con las palabras que contiene donde nos aseguramos que cada
+        ///char es una letra o un numero y ademas en minusculas.
+        ///</summary>
+
 
         public static List<string> GetWordsFromString(string cad)
         {

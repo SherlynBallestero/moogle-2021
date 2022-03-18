@@ -18,36 +18,53 @@ namespace MoogleEngine
         /// (3)~ >Palabras a las que le corresponde calcular la cercania.
         ///Ademas nos aporta con una variable por referencia la devolucion de un query limpio(sin operadores)
         ///</summary>
-        public static Symbol GetSymbol(string query,string route)
+        public static Symbol GetSymbol(string query,string route, Dictionary<string, List<List<int>>> positions)
         {
             Operator Op = new Operator(query);
 
             string yes = " ";
             string no = " ";
+            string aux="";
 
             List<(string, string)> Closeness = new List<(string, string)>();
             Dictionary<string, int> asterisks = new Dictionary<string, int>();
 
             foreach(var x in Op.MustExistWords)
             {
-                yes += x + " ";
+                Suggestion sg=new Suggestion(x);
+
+                aux=sg.suggestionForQuery(positions);
+                
+                yes += WordInformation.GetWordsFromString(aux)[0] + " ";
             }
 
             foreach(var x in Op.MustNotExistWords)
             {
-                no += x + " ";
+                Suggestion sg=new Suggestion(x);
+
+                aux=sg.suggestionForQuery(positions);
+                
+               
+                no += WordInformation.GetWordsFromString(aux)[0] + " ";
             }
 
             foreach(var x in Op.PairWords)
             {
-                Closeness.Add((x.Item1, x.Item2));
+                Suggestion sg=new Suggestion(x.Item1);
+                Suggestion sg2=new Suggestion(x.Item2);
+
+                aux=sg.suggestionForQuery(positions);
+                string  aux2=sg2.suggestionForQuery(positions);
+                Closeness.Add((WordInformation.GetWordsFromString(aux)[0], WordInformation.GetWordsFromString(aux2)[0]));
             }
             
             foreach(var x in Op.ImportanceWords)
             {
                 if(x.Value != 0)
-                {
-                    asterisks.Add(x.Key, x.Value);
+                {                      
+                    Suggestion sg=new Suggestion(x.Key);
+                    aux=sg.suggestionForQuery(positions);
+                    asterisks.Add(WordInformation.GetWordsFromString(aux)[0], x.Value);
                 }
             }
 
@@ -105,8 +122,38 @@ namespace MoogleEngine
             {
                 foreach (string file in files)
                 {
-                    List<int> aux1 = positions[words[i].t1][i];
-                    List<int> aux2 = positions[words[i].t2][i];
+                    //procedimiento para asegurarnos de buscar las posiciones de las palabras afectadas por el operador
+                    //de cercania en casi de que no la encontremos entre nuestros documentos a partir del metodo hecho para sugerencias.
+                    List<int> aux1=new List<int>();
+                    if(positions.ContainsKey(words[i].t1))
+                    {
+                        aux1 = positions[words[i].t1][i];
+                       
+                    }
+                    else
+                    {
+                        Suggestion sg=new Suggestion(words[i].t1);
+                        string suggestionInOperators1=sg.suggestionForQuery(positions);
+                        suggestionInOperators1=WordInformation.GetWordsFromString(suggestionInOperators1)[0];
+                         aux1 = positions[suggestionInOperators1][i];
+                    }
+
+                    
+                   
+
+                     List<int> aux2=new List<int>();
+                    if(positions.ContainsKey(words[i].t2))
+                    {
+                         aux2 = positions[words[i].t2][i];
+                    }
+                    else
+                    {
+                        Suggestion sg=new Suggestion(words[i].t2);
+                        string suggestionInOperators2=sg.suggestionForQuery(positions);
+                        suggestionInOperators2=WordInformation.GetWordsFromString(suggestionInOperators2)[0];
+                         aux1 = positions[suggestionInOperators2][i];
+                    }
+
                     int min = int.MaxValue;
                     for (int j = 0; j < aux1.Count; j++)
                     {

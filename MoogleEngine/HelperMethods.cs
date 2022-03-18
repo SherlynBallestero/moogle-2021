@@ -155,47 +155,7 @@ namespace MoogleEngine
                 return false;
             }
         }
-        ///<summary>
-        ///metodo para ordenar un array de mayor a menor
-        /// </summary>
-        ///<param name="index">en index obtendremos los indices ordenados luego de cambiar los elementos del array de lugar,es decir si cambiamos los elementos de un array en las posiciones 2 y 1 obtendremos index={0,2,1}  </param>
-        public  double[] Ordenar(double[] a, out double[] index)
-        {
-            index = new double[a.Length];
-            double[] aux = new double[a.Length];
-            double temp = 0;
-            for (int i = 0; i < index.Length; i++)
-            {
-                aux[i] = a[i];
-                index[i] = i;
-            }
-            //metodo burbuja de ordenación de array          
-            for (int i = 0; i < a.Length - 1; i++)
-                for (int j = i + 1; j < a.Length; j++)
-                {
-                    if (a[i] < a[j])
-                    {
-                        temp = a[i];
-                        a[i] = a[j];
-                        a[j] = temp;
-                    }
 
-                }
-            //obtención del indice correspondiente a cada elemento que fue cambiado en el orden para poder obtener el archivo corresp[ondiente a cada score]
-            for (int i = 0; i < a.Length; i++)
-                for (int j = i; j < a.Length; j++)
-                {
-                    if (a[i] == aux[j])
-                    {
-                        temp = index[i];
-                        index[i] = index[j];
-                        index[j] = temp;
-
-                        break;
-                    }
-                }
-            return a;
-        }
         ///<summary>
         ///metodo para eleiminar todos los elementos nulos o vacios de un array dado.
         /// </summary>
@@ -231,64 +191,6 @@ namespace MoogleEngine
         }
 
         ///<summary>
-        ///Metodo para concatenar dos arrays de enteros
-        ///</summary>
-        public static int[] ConcatInt(int[] a,int[] b)
-        {
-            int[] concated=new int[a.Length+b.Length];
-            int[]c={-1};
-            //creo que no debe haber ningun problema con eso pq no tiene pq llegar el caso en que aux sea 
-            //{-1} dado que se le pasan arrays de int con las posiciones en que se encuentra una palabra 
-            //dada para cierto doc,hay que ver cuando esa palabra no se encuentra en el documento que es
-            // lo q me da en las posiciones,en el caso de que obtenga -1 habria que ver no vaya a ser que mande a indexar en el documento en menos 1
-            
-             if (a is null)
-            {
-                if (b is null)
-                {
-                    return c;
-                }
-                else
-                {
-                    return b;
-                }
-            }
-            else if (b is null) return a;
-            for (int i = 0, j = 0; i < concated.Length; i++)
-            {
-                if (i < a.Length)
-                {
-                        concated[i] = a[i];
-                }
-                else
-                {
-                        concated[i] = b[j];
-                    j++;
-                }
-            }
-            return concated;
-        }
-        ///<summary>
-        ///En este proceso se obtiene en un array cada palabra que existe en total de todos los documentos sin 
-        ///repeticion y asegurando que no hayan espacios en blanco o elementos null.
-        ///</summary>   
-        public static string[] WordsInCollection(string route)
-        {
-            
-            string[] file = Directory.GetFiles(route, "*.txt");
-            string[] words = { " " };
-            string[] aux = { " " };
-            for (int i = 0; i < file.Length; i++)
-            {
-                string line = System.IO.File.ReadAllText(file[i]);
-                aux = TokenWords(line);
-                words = Concat(words, aux);
-
-            }
-            words = NullDelet(words);
-            return words;
-        }
-        ///<summary>
         ///Metodo margesort para ordenar list<int,string>
         ///</summary> 
         public static void MargeSortToList(List<(int,string)> list)
@@ -309,6 +211,9 @@ namespace MoogleEngine
             list=new List<(int, string)>();          
             list=CopyListToList(list);
         } 
+        ///<summary>
+        ///Metodo auxiliar para el MargeSortToList
+        ///</summary> 
         public static List<(int,string)> Marge(List<(int,string)> list,int start1,int end1,int start2,int end2)
         {
             int a=start1;
@@ -369,70 +274,70 @@ namespace MoogleEngine
         ///<summary>
         ///Metodo margesort para ordenar list<double,string>
         ///</summary> 
-        public static void MargeSortToListDouble(List<(double,string)> list)
-        {
-            MargeSortToListDouble(list,0,list.Count-1);
-        }
-        public static void MargeSortToListDouble(List<(double,string)> list,int start, int end)
-        {
-            //condicion de parada
-            if(start==end)return;
-            //buscando el medio de la lista de elementos
-            int mit=(start+end)/2;
-            //ordenar1ra mitad y luego la segunda
-            MargeSortToListDouble(list,start,mit);
-            MargeSortToListDouble(list,mit+1,end);
-            MargeDouble(list,start,mit,mit+1,end);
-            //copiar los elementos de aux a x
-            list=new List<(double, string)>();          
-            list=CopyListToListDouble(list);
-        } 
-        public static List<(double,string)> MargeDouble(List<(double,string)> list,int start1,int end1,int start2,int end2)
-        {
-            int a=start1;
-            int b=start2;
-            List<(double,string)> answer=new List<(double, string)>();
-            int t=(end1-start1)+(end2-start2);
-            for(int i=0;i<t;i++)
-            {
-                if(b!=list.Count)
-                {
-                    if(a>end1 && b<=end2)
-                    {
-                        answer.Add(list[b]);
-                        b++;
-                    }
-                    if(b>end2 && a<=end1)
-                    {
-                        answer.Add(list[a]);
-                        a++;
-                    }
-                          if(b<=end2 && a<=end1)
-                    {
-                        if(list[a].Item1>+list[b].Item1)
-                        {
-                            answer.Add(list[a]);
-                            a++;
-                        }
-                        else
-                        {
-                            answer.Add(list[b]);
-                            b++;
-                        }
-                    }
+        // public static void MargeSortToListDouble(List<(double,string)> list)
+        // {
+        //     MargeSortToListDouble(list,0,list.Count-1);
+        // }
+        // public static void MargeSortToListDouble(List<(double,string)> list,int start, int end)
+        // {
+        //     //condicion de parada
+        //     if(start==end)return;
+        //     //buscando el medio de la lista de elementos
+        //     int mit=(start+end)/2;
+        //     //ordenar1ra mitad y luego la segunda
+        //     MargeSortToListDouble(list,start,mit);
+        //     MargeSortToListDouble(list,mit+1,end);
+        //     MargeDouble(list,start,mit,mit+1,end);
+        //     //copiar los elementos de aux a x
+        //     list=new List<(double, string)>();          
+        //     list=CopyListToListDouble(list);
+        // } 
+        // public static List<(double,string)> MargeDouble(List<(double,string)> list,int start1,int end1,int start2,int end2)
+        // {
+        //     int a=start1;
+        //     int b=start2;
+        //     List<(double,string)> answer=new List<(double, string)>();
+        //     int t=(end1-start1)+(end2-start2);
+        //     for(int i=0;i<t;i++)
+        //     {
+        //         if(b!=list.Count)
+        //         {
+        //             if(a>end1 && b<=end2)
+        //             {
+        //                 answer.Add(list[b]);
+        //                 b++;
+        //             }
+        //             if(b>end2 && a<=end1)
+        //             {
+        //                 answer.Add(list[a]);
+        //                 a++;
+        //             }
+        //                   if(b<=end2 && a<=end1)
+        //             {
+        //                 if(list[a].Item1>+list[b].Item1)
+        //                 {
+        //                     answer.Add(list[a]);
+        //                     a++;
+        //                 }
+        //                 else
+        //                 {
+        //                     answer.Add(list[b]);
+        //                     b++;
+        //                 }
+        //             }
 
-                }
-                else
-                {
-                    if(a<=end1)
-                    {
-                        answer.Add(list[a]);
-                        a++;
-                    }
-                }
-            }
-            return answer;
-        }
+        //         }
+        //         else
+        //         {
+        //             if(a<=end1)
+        //             {
+        //                 answer.Add(list[a]);
+        //                 a++;
+        //             }
+        //         }
+        //     }
+        //     return answer;
+        // }
         public  static List<(double,string)> CopyListToListDouble(  List<(double,string)> list)
         {
             List<(double,string)>answer=new List<(double, string)>();
@@ -444,5 +349,56 @@ namespace MoogleEngine
             
             
         }
+
+        
+    public static List<Tuple<string,int>> GetWordsAndPositionsFromString(string cad)
+    {
+        List<Tuple<string,int>> vect = new List<Tuple<string,int>>();
+
+        int last = -1;
+        StringBuilder word = new StringBuilder();
+
+        for(int i = 0 ; i < cad.Length ; i++)
+        {
+            if(Char.IsLetterOrDigit(cad[i]))
+            {
+                if(word.Length == 0)last = i;
+                word.Append(cad[i]);
+            }
+            else
+            {
+                if(word.Length > 0)
+                {
+                    vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
+                    last = -1;
+                    word.Clear();
+                }
+            }
+        }
+
+        if(word.Length > 0)
+        {
+            vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
+            last = -1;
+            word.Clear();
+        }
+
+        return vect;
+    }
+
+    
+
+     public static string WordListToString(List<string> vect)
+    {
+        StringBuilder cad = new StringBuilder();
+
+        for(int i = 0 ; i < vect.Count ; i++)
+        {
+            if(i > 0)cad.Append(" ");
+            cad.Append(vect[i]);
+        }
+
+        return cad.ToString();
+    }
     }
 }
