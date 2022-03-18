@@ -168,7 +168,7 @@ namespace MoogleEngine
                     min = int.MaxValue;
                 }
             }
-            //margesort para listas y devolver distance ordenado de mayyor a menor
+            //margesort para listas y devolver distance ordenado de mayor a menor
             HelperMethods.MargeSortToList(distanceForDocument);
 
             return distanceForDocument;
@@ -221,7 +221,7 @@ namespace MoogleEngine
                 }
             }
 
-            //marks va a ser falso en i cuando vetamos al documento en la posicion i.
+            //marks va a ser true en i cuando vetamos al documento en la posicion i.
             for(int i=0;i<marks.Length;i++)
             {
                 if(marks[i])answer.Add(files[i]);
@@ -229,16 +229,7 @@ namespace MoogleEngine
             if(answer is null)answer.Add("notElements");
             return answer;
         }
-        public static int CountAsterisks(string word)
-        {
-            int count=0;
-            for(int i=0;i<word.Length;i++)
-            {
-                if(word[i]=='*')count++;
-                else break;
-            }
-            return count;
-        }
+   
 
     }
 }

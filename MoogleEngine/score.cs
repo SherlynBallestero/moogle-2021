@@ -15,21 +15,6 @@ namespace MoogleEngine
         }
 
         ///<summary>
-        /////Con este metodo se buscara la frecuencia con que aparece un termino t en un documento d
-        ///</summary>
-        public double TF(string t, string pathToFolder)
-        {
-            double count = 0;
-           
-            string[] words=File.ReadAllText(pathToFolder).Split(' ');
-                foreach (string word in words)
-                {
-                      if (word == t) count++;
-                }
-
-            return count;
-        }
-        ///<summary>
         ///retorna Frecuencia Inversa de Documento, medida para conocer que tan raro es el término t en una colección de documentos dada.
         /// </summary> 
         /// <param name="route">Ruta hacia la carpeta en que se encuentran los archivos entre los que buscar.</param>       
@@ -48,31 +33,7 @@ namespace MoogleEngine
             idf = Math.Log(NomberOfDocuments / FoundT);
             return idf;
         }
-        ///<summary>
-        ///calcula  la relevancia de una palabra especifica en cada documento de una colección
-        /// </summary>
-        public  static double[] TFIDF(string[] files,string route , string term, Symbol symbol)
-        {
-            score scr=new score();
-            Dictionary<string, int> asterisks = symbol.asterisks;
-            //para agregar importancia a las palabras que contienen asteriscos
-            double increase = 1;
-            if (asterisks.ContainsKey(term)) increase = Math.Pow(2, asterisks[term]);
-             
-            double[] answer = new double[files.Length];
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                answer[i] = (scr.TF(term, files[i]) * IDF(term,files, route)) * increase;
-            }
-            return answer;
-        }
-         //file es la path a las files
-         //closeness lista con distanciasmejores por documento
-         //queryguide es el query hevho array de string limpio
-         //diccionario de las posiciones y luego el path
-         //mejoras necesarias: trabajar con los tf guardados en diccionary y si estoy pa eso guardar los tfidf por 
-         //palabra y en el de tf solo poner la palabra con mas frecuencia por documento 
+    
         public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route, Dictionary<string, List<double>> DictionaryForTF, Dictionary<string, double> DictionaryForIDF)
         {  
             // System.Diagnostics.Stopwatch ccc = new System.Diagnostics.Stopwatch();

@@ -97,7 +97,7 @@ namespace MoogleEngine
             return Math.Min(Math.Max(dp[n, m] / tot, 0), 1);
         }
         ///<summary>
-        ///funcion para encontrat la sugerencia a partur de las similitudes de las palabras que tenemos en 
+        ///funcion para encontrar la sugerencia a partir de las similitudes de las palabras que tenemos en 
         ///los documentos con en query ingresado.
         ///</summary>
         public string suggestionForQuery( Dictionary<string,  List<List<int>>> dictionary)

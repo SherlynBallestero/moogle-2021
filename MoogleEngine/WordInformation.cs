@@ -9,13 +9,16 @@ namespace MoogleEngine
     //con esta clase se pretende crear un diccionario a partir de una direccion,en donde guarde la información que se requiere de cada palabra que se encuentra en los documento de una carpeta dada por dicha dirección.
     public class WordInformation
     {
+
         public string path;
+      
         public WordInformation(string path)
         {
             if (path == null)
                 throw new ArgumentException("The input path can't be null");
             this.path = path;
         }
+        
 
         ///<summary>
         ///Devuelve un array a partir de otro array de string pero arrays sin elementos null y sin espacios en blanco
@@ -35,134 +38,7 @@ namespace MoogleEngine
             answer = moment.ToArray();
             return answer;
         }
-        ///<summary>
-        ///Devuelve la concatenacion de dos arrays  sin espacios en blanco
-        ///</summary>
-        public static string[] ConcatWhithRepetition(string[] a, string[] b)
-        {
-            string[] c = { " " };
-            string[] concated = new string[a.Length + b.Length];
-
-            if (a is null)
-            {
-                if (b is null)
-                {
-                    return c;
-                }
-                else
-                {
-                    return b;
-                }
-            }
-            else if (b is null) return a;
-            for (int i = 0, j = 0; i < concated.Length; i++)
-            {
-                if (i < a.Length)
-                {
-                    if (!(String.IsNullOrEmpty(a[i])))
-                        concated[i] = a[i];
-                }
-                else
-                {
-                    if (!(String.IsNullOrEmpty(b[j])))
-                        concated[i] = b[j];
-                    j++;
-                }
-            }
-            concated = NullDelet(concated);
-            return concated;
-        }
-
-        ///<summary>
-        ///Devuelve la concatenacion de dos arrays sin repeticion y sin espacios en blanco
-        ///</summary>
-        public static string[] Concat(string[] a, string[] b)
-        {
-            string[] c = { " " };
-            string[] concated = new string[a.Length + b.Length];
-
-            if (a is null)
-            {
-                if (b is null)
-                {
-                    return c;
-                }
-                else
-                {
-                    return b;
-                }
-            }
-            else if (b is null) return a;
-            for (int i = 0, j = 0; i < concated.Length; i++)
-            {
-                if (i < a.Length)
-                {
-                    if (!FindInArray(concated, a[i]) && !(String.IsNullOrEmpty(a[i])))
-                        concated[i] = a[i];
-                }
-                else
-                {
-                    if (!FindInArray(concated, b[j]) && !(String.IsNullOrEmpty(b[j])))
-                        concated[i] = b[j];
-                    j++;
-                }
-            }
-            concated = NullDelet(concated);
-            return concated;
-        }
-
-        ///<summary>
-        ///Devuelve true si el parametro b se encuentra en el string a
-        ///</summary>
-        public static bool FindInArray(string[] a, string b)
-        {
-            if (!(a is null))
-            {
-                for (int i = 0; i < a.Length; i++)
-                {
-                    if (!(String.IsNullOrEmpty(a[i])) && a[i].Equals(b))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        ///<summary>
-        ///A partir de una frase devuelve un array de string donde a cada palabra se le hacen las transformaciones necesarias para que solo contenga letras y numeros en utfo
-        ///</summary>
-        public static string[] TokenWords(string phrase)
-        {
-            string[] words = phrase.Split(' ');
-            string[] newWords = new string[words.Length];
-            int index = 0;
-            string w = "";
-
-            foreach (string word in words)
-            {
-                w = word;
-                w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-                newWords[index] = w;
-            }
-            return newWords;
-        }
-        ///<summary>
-        ///devuelve un array de string a partir de una frase
-        ///</summary>       
-        public static string[] SplitPhraseInWords(string phrase)
-        {
-            string[] words = phrase.Split(' ');
-            for (int i = 0; i < words.Length; i++)
-            {
-                words[i] = words[i].ToLower();
-            }
-            return words;
-        }
-
+        
         ///<summary>
         ///En este proceso se obtiene en un array cada palabra que existe en total de todos los documentos sin 
         ///repeticion y asegurando que no hayan espacios en blanco o elementos null.
@@ -177,8 +53,6 @@ namespace MoogleEngine
             for (int i = 0; i < file.Length; i++)
             {
                 string line = System.IO.File.ReadAllText(file[i]);
-                // aux = TokenWords(line);
-
                 List<string> aux = GetWordsFromString(line);
 
                 foreach (var x in aux)
@@ -195,40 +69,6 @@ namespace MoogleEngine
             }
 
             return words.ToArray();
-        }
-        ///<summary>
-        ///En este proceso se obtiene en un array cada palabra que existe en un documento, ademas de las comas 
-        ///y espacios en blancos para saber las posiciones.
-        ///</summary>   
-        public static string[] WordsInDocuments(string document)
-        {
-            string[] reader = System.IO.File.ReadAllText(document).Split(' ');
-            return reader;
-
-        }
-        ///<summary>
-        ///Devuelve las posiciones de un termino en un documento
-        ///</summary>
-        public static List<int> PositionInDocument(string word, string document, string route)
-        {
-            score scr = new score();
-            string[] allWordsInDocument = WordsInDocuments(document);
-            allWordsInDocument = WordInformation.NullDelet(allWordsInDocument);
-            List<int> answer = new List<int>();
-            if (scr.TF(word, document) == 0)
-            {
-                answer.Add(-1);
-                return answer;
-            }
-
-            for (int i = 0; i < allWordsInDocument.Length; i++)
-            {
-                if (allWordsInDocument[i] == word)
-                {
-                    answer.Add(i);
-                }
-            }
-            return answer;
         }
         ///<summary>
         ///Devuelve un segmento de codigo de determinado documento
@@ -274,12 +114,12 @@ namespace MoogleEngine
 
                 return string.Join(" ", text[pos..end]);
             }
-
+            //cuando tiene mas de una palabra nos ubicamos a partir d ela palabra mas relevante
             double tfidf = double.MinValue;
-
+            //auxiliar
             string cad = "";
 
-            //Iterando por las palabras de la query
+            //Iterando por las palabras del query y nos quedamos con la de mayor relevancia
             foreach(var x in queryWords)
             {   
                 if(dictionary.ContainsKey(x) && dictionary[x][index][0] != -1)
@@ -292,11 +132,15 @@ namespace MoogleEngine
                     }
                 }
             }
+            // si[] tomame 30 palabras a partor de la posicion 0
 
             if(tfidf == double.MinValue)
             {
                 return string.Join(" ", text[0..(Math.Min(30, text.Length))]);
             }
+            //aca se ajusta la posicion desde la que se comienzan a tomar las palabras que saldran en el snippet,se trata de 
+            //tomar 5 palabras anteriores a la palabra mas relevante si no se puede nos quedamos con cero como posicion inicial
+            //si no se puede tomar 30 mas se toma hasta el final del texto. 
                 
             if(dictionary.ContainsKey(cad))pos = dictionary[cad][index][0];
             else pos = 0;
@@ -326,67 +170,75 @@ namespace MoogleEngine
         ///Devuelve una lista a partir de un string pero con las palabras que contiene donde nos aseguramos que cada
         ///char es una letra o un numero y ademas en minusculas.
         ///</summary>
-
-
         public static List<string> GetWordsFromString(string cad)
         {
-            List<string> vect = new List<string>();
 
+            List<string> answer = new List<string>();
             StringBuilder word = new StringBuilder();
-
+            //se recorre la cadena que se da como entrada
             for (int i = 0; i < cad.Length; i++)
             {
+                //si el char que se analiza es una letra o un numero se agrega a la palabra que se incorporara a la lista, o sea se 
+                //va conformando cada palabra que se pondra por separado en la lista que se retorna solo con letras o digitos.
                 if (Char.IsLetterOrDigit(cad[i]))
                 {
                     word.Append(cad[i]);
                 }
                 else
                 {
+                    //si no lo es vemos si se ha agregado a word algun char
                     if (word.Length > 0)
                     {
-                        vect.Add(word.ToString().ToLower());
+                        //agregamos a la lista de retorno lo que se ha conformado de la palabra limpia en minusculas y se limpia el string builder
+                        //para seguir a la siguiente pelabra a formar.
+                        answer.Add(word.ToString().ToLower());
                         word.Clear();
                     }
                 }
             }
+            // aca se agrega la ultima palabra que se formo a la lista.
 
             if (word.Length > 0)
             {
-                vect.Add(word.ToString().ToLower());
+                answer.Add(word.ToString().ToLower());
                 word.Clear();
             }
 
-            return vect;
+            return answer;
         }
 
         ///<summary>
-        ///Rellenar dos diccionarios y devuelve un diccionario que lleva por cada palabra q existe referente a cada
-        /// documento la frecuencia de dada palabra para cada documento y otro que por cada documento almacena las
-        /// documento la frecuencia de dada palabra para cada documento.    
+        ///Se rellenan tres diccionarios, uno que lleva por cada palabra q existe referente a cada
+        /// documento la frecuencia de la palabra, otro que por cada documento almacena las
+        ///frecuencia de la palabra y un tercero que para cada documento nos dice rl idf(rareza) de la palabra.
+        ///Con palabra se refiere al total de todas las palabras del conjunto de documentos.    
         ///</summary>        
         public (Dictionary<string, List<double>> TF, Dictionary<string, double> IDF, Dictionary<string, List<List<int>>> Pos) FillDictionary()
         {
+            //Se hace instancia d ela clase score.
             score score = new score();
             string[] file = Directory.GetFiles(this.path, "*.txt");
             string[] words = { " " };
+            //obteniendo cada palabra de la coleccion
             words = WordsInCollection();
 
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento el tf de esa palabra en
             // ese documento.
             Dictionary<string, List<double>> wordsTf = new Dictionary<string, List<double>>();
             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento las posiciones en que
-            // encontramos dicha palabra.
+            //se  encuentra dicha palabra.
             Dictionary<string, List<List<int>>> wordInf = new Dictionary<string, List<List<int>>>();
+             //Diccionary para guardar por cada palabra(clave) ,en relacion con cada documento los idf de la palabra.
+             Dictionary<string, double> wordsIDF = new Dictionary<string, double>();
+            
             //rellenando...
             List<double> tfAux = new List<double>();
-
-            Dictionary<string, double> wordsIDF = new Dictionary<string, double>();
 
             Dictionary<string, Dictionary<string, List<int>>> WordsAll = new Dictionary<string, Dictionary<string, List<int>>>();
 
             Dictionary<string, int> TextSize = new Dictionary<string, int>();
 
-            //Creando keys
+            //Creando keys  a partir del array de palabras
             foreach (string cad in words)
             {
                 WordsAll.Add(cad, new Dictionary<string, List<int>>());
@@ -395,16 +247,19 @@ namespace MoogleEngine
             //Armando posiciones para cada palabra en cada documento
             foreach (string f in file)
             {
+                //se hace array todo el documento
                 string[] text = GetWordsFromString(System.IO.File.ReadAllText(f)).ToArray();
-
+                //se almacena por cada documento su tamaño
                 TextSize.Add(f, text.Length);
-
+                //vamos por cada palabra del documento
                 for (int i = 0; i < text.Length; i++)
                 {
+                    //Si no se ha agregado el documento lo agregamos he inicializamos la lista de posiciones para la palabra text[i]
                     if (WordsAll[text[i]].ContainsKey(f) == false)
                     {
                         WordsAll[text[i]].Add(f, new List<int>());
                     }
+                    //se agrega a wordsAll en la palabra text[i] la posicion en que se encuentra dicha palabra
 
                     WordsAll[text[i]][f].Add(i);
                 }
@@ -415,19 +270,21 @@ namespace MoogleEngine
             {
                 //cantidad de docs en que esta
                 int cont = word.Value.Count;
-
+                //idf es el logaritmo de la cantidad de documentos entre la cantidad de documentos en que se encuentra la palabra
                 wordsIDF.Add(word.Key, Math.Log(file.Length / cont));
             }
 
             //Llenando TF y Positions
+            //vamos por cada palabra 
             for (int i = 0; i < words.Length; i++)
             {
                 List<List<int>> Positions = new List<List<int>>();
-
                 List<double> TFaux = new List<double>();
-
+                //vamos por cada documento
                 foreach (string f in file)
                 {
+                    //si en wordsAll no se encuentra la palabra entonces no esta en ese documento por tanto agregamos 
+                    //-1 para decir que no esta a la lista de posiciones correspondiente a dicha palabra, y a la frecuencia 0
                     if (WordsAll[words[i]].ContainsKey(f) == false)
                     {
                         Positions.Add(new List<int>() { -1 });
@@ -435,6 +292,9 @@ namespace MoogleEngine
                     }
                     else
                     {
+                        //agregame a la lista de posiciones de la palabra i en el documento f las posiciones calculadas y almacenadas en 
+                        // el dictionary WordsAll y al tfaux 0 si no hay palabras en el documento, si hay pues se agrega el tf correspondiente
+                        // o sea la cant de veces que se encuentra word[i] entre el tamaño del documento
                         Positions.Add(WordsAll[words[i]][f]);
                         if (TextSize[f] == 0)
                         {
@@ -446,6 +306,7 @@ namespace MoogleEngine
                         }
                     }
                 }
+                //agregamos las posiciones y tf calculadas para la palabra word[i] a los diccionarios que se retornaran
 
                 wordInf.Add(words[i], Positions);
 
@@ -455,63 +316,43 @@ namespace MoogleEngine
             return (wordsTf, wordsIDF, wordInf);
         }
 
-        public static int[] ConcatInt(int[] a, int[] b)
+        ///<summary>
+        ///agregando sinonimos al query y formando un nuevo query con 5 veces el query que nos da el usuario mas 3 sinonimos  
+        ///por cada palabra que contiene el query para darles un valor a los sinonimos pero que no sea elevado con respectos a las
+        /// palabras exactas de la busqueda 
+        ///</summary>
+        public  string[] AddSynonymous(string[] word,Dictionary<string, List<string>> synonymous,Dictionary<string, List<List<int>>> DictionaryForPositions)
         {
-            int[] concated = new int[a.Length + b.Length];
-            int[] c = { -1 };
-            //creo que no debe haber ningun problema con eso pq no tiene pq llegar el caso en que aux sea {-1} dado que se le pasan 
-            //arrays de int con las posiciones en que se encuentra una palabra dada para cierto doc,hay que ver cuando esa palabra no se encuentra en el documento que es lo q me da en las posiciones,en el caso de que obtenga -1 habria que ver no vaya a ser que mande a indexar en el documento en menos 1
+             List<string> synonymousQuery=new List<string>(); 
+            foreach(string y in word)
+            {
+                if(synonymous.ContainsKey(y))
+            {
+                int count=0;
+                foreach(string x in synonymous[y])
+                {
+                    if(DictionaryForPositions.ContainsKey(x))
+                    {
+                        synonymousQuery.Add(x);
+                        count++;
+                    }
+                    if(count==2)break;
+                        
+                }
+            }
+            }
+            foreach(string z in word)
+            {
+                int count=0;
+                while(count<5)
+                {
+                    synonymousQuery.Add(z);
+                    count++;
+                }
+            }
+            return synonymousQuery.ToArray();
 
-            if (a is null)
-            {
-                if (b is null)
-                {
-                    return c;
-                }
-                else
-                {
-                    return b;
-                }
-            }
-            else if (b is null) return a;
-            for (int i = 0, j = 0; i < concated.Length; i++)
-            {
-                if (i < a.Length)
-                {
-                    concated[i] = a[i];
-                }
-                else
-                {
-                    concated[i] = b[j];
-                    j++;
-                }
-            }
-            return concated;
         }
-        ///<summary>
-        ///Metodo para determinar si dado un intervalo [a,b] referentes a posicion a y
-        // posicion b en el documento saber si las palabras del query aparecen en dicho intervalo.
-        ///</summary>
-        public static bool SubsetContent(int lowerEnd, int topEnd, string[] queryWords, Dictionary<string, List<List<int>>> dictionary, int documentIndex)
-        {
-            foreach (string word in queryWords)
-            {
-                if (dictionary.ContainsKey(word))
-                    if (!IsInSet(dictionary[word][documentIndex].ToArray(), lowerEnd, topEnd)) return false;
-            }
-            return true;
-        }
-        ///<summary>
-        ///Metodo para determinar si dado un intervalo [a,b] referentes a posicion a y
-        // posicion b en el documento saber si las palabras con mas peso del query aparecen en dicho intervalo.
-        ///</summary>
-        public static bool IsInSet(int[] a, int lowerEnd, int topEnd)
-        {
-            foreach (int position in a)
-            {
-                if (position <= topEnd && position >= lowerEnd) return true;
-            }
-            return false;
-        }
+       
     }
 }

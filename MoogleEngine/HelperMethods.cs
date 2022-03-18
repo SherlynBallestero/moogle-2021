@@ -65,75 +65,7 @@ namespace MoogleEngine
             }
             return answer;
         }
-        ///<summary>
-        ///metodo para dejar en las palabras solo numeros y letras,quitando signos de puntuacion y normalizando las palabras
-        /// </summary>
-        public static string[] TokenWords(string phrase)
-        {
-            string[] words = phrase.Split(' ');
-            string[] newWords = new string[words.Length];
-            int index = 0;
-            string w = "";
-            bool change = false;
-            foreach (string word in words)
-            {
-                for (int i = 0; i < word.Length; i++)
-                {
-                    if (char.IsLetter(word[i]) || char.IsNumber(word[i]))
-                    {
-                        w += word[i];
-                    }
-                    else
-                    {
-                        //change se hace false cuando hubo un caso en q se encontro con un char que no es letra
-                        change = true;
-                    }
-                }
-                w = Regex.Replace(w.Normalize(System.Text.NormalizationForm.FormD), @"[^a-zA-z0-9 ]+", "");
-                newWords[index] = w;
-                w = "";
-                index++;
-                change = false;
-            }
-            return newWords;
-        }
-        ///<summary>
-        ///metodo para concatenar dos arrays,te devuelve un nuevo array con la union de los dos arrays que se le pasan como entrada en dodne ningun elemento estara repetido y no habrán elementos nulos o espacios vacios.
-        /// </summary>
-        public static string[] Concat(string[] a, string[] b)
-        {
-            string[] c = { " " };
-            string[] concated = new string[a.Length + b.Length];
-
-            if (a is null)
-            {
-                if (b is null)
-                {
-                    return c;
-                }
-                else
-                {
-                    return b;
-                }
-            }
-            else if (b is null) return a;
-            for (int i = 0, j = 0; i < concated.Length; i++)
-            {
-                if (i < a.Length)
-                {
-                    if (!FindInArray(concated, a[i]) && !(String.IsNullOrEmpty(a[i])))
-                        concated[i] = a[i];
-                }
-                else
-                {
-                    if (!FindInArray(concated, b[j]) && !(String.IsNullOrEmpty(b[j])))
-                        concated[i] = b[j];
-                    j++;
-                }
-            }
-            concated = NullDelet(concated);
-            return concated;
-        }
+     
         ///<summary>
         ///Devuelve true si el parametro b se encuentra en el array de string a
         ///</summary>

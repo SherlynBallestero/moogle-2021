@@ -22,7 +22,7 @@ public class Moogle
     static Dictionary<string, List<double>> DictionaryForTF= new Dictionary<string, List<double>>();
     static Dictionary<string, double> DictionaryForIDF= new Dictionary<string,double>();
 
-    static Dictionary<string, List<string>> sinonymous = new Dictionary<string, List<string>>();
+    static Dictionary<string, List<string>> synonymous = new Dictionary<string, List<string>>();
     //inicializando las estructuras que se utilizaran, las inicializamos al ejecutar el moogle. Se llaama a esta en moogle 
     //server en la linia 4
     public static void Init()
@@ -38,16 +38,16 @@ public class Moogle
 
         //******************************
         //recoger diccionario de posiciones
-        //esta funcion es una idea de implementacion que puede hacer mas rapida la busca,se propone tranajar en ella
-        //por ahora no se implemento porque habria que hacer muchos cambios de estructura
+        //esta funcion es una idea de implementacion que puede hacer mas rapida la busca,se propone trabajar en ella,
+        //por ahora no se implemento porque habria que hacer muchos cambios de estructura.
        //////  DictionaryForPositions=DictionaryWork.TekeDictionaryPosition();
        //*******************************
 
         // recoger dictionary de sinonimos
-        sinonymous = DictionaryWork.TekeDictionarySyn();
+        synonymous = DictionaryWork.TekeDictionarySyn();
     }
 
-    //metodo para devolver los item de busqueda
+    //metodo para devolver los item de la busqueda
     public static SearchResult Query(string query)
     {
         //primero limpiamos el query o sea le dejamos unicamente letras y numeros y en minusculas
@@ -64,11 +64,17 @@ public class Moogle
         Symbol symbol = operators.GetSymbol(query, path,DictionaryForPositions);
         //obteniendo array de palabras a partir del query sin operadores y que ademas se encuentre en nuestro conjunto total de palabras
         string[] newQuery = HelperMethods.NullDelet(suggestion.Split());
+        //obtengo los sinonimos de las palabras del query
+        System.Diagnostics.Stopwatch stp=new System.Diagnostics.Stopwatch();
+    
+        newQuery =wordInfo.AddSynonymous(newQuery,synonymous,DictionaryForPositions);
+        
         //obteniendo lista con las distancias mas cercanas de las posiciones de las palabras afectadas por el operador"~"
         List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
         //lista de score por nombre de documento ordenados de mayor a menor
+            
         List<(double, string)> scores = score.MV(DistanceInWordsWhithOperator, filesPath, newQuery, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
-        
+       
         //...snippet...
         //orden en que se debe obtener el snnipet segun el orden dado por el score.
         string[] DocumentsInOrder = new string[scores.Count];
