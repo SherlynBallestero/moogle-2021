@@ -82,7 +82,8 @@ public class Moogle
         //Creando los items para conformar SearchResult que se devolvera
         List<SearchItem> items = new List<SearchItem>();
         //se piensa en retornar a lo sumo tres resultados
-        for (int i = 0; i < Math.Min(3, snippet.Length); i++)
+        //////////////////////////for (int i = 0; i < Math.Min(3, snippet.Length); i++)
+        for (int i = 0; i < scores.Count; i++)
         {
             //solo se agregan los documentos con score mayor que cero a los resultados de la busqueda.
             if (scores[i].Item1 > 0){

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System;
 namespace MoogleEngine
 {
-    
 
-    public class HelperMethods 
+
+    public class HelperMethods
     {
         public string path;
-        public  HelperMethods(string path)
+        public HelperMethods(string path)
         {
             this.path = path;
         }
@@ -36,7 +36,7 @@ namespace MoogleEngine
         /// </summary>
         /// <param name="term">termino que se busca entre los documentos.</param>
         /// <param name="route">ruta de acceso a una serie de archivo(un documento)s entre los que buscar.</param>
-        public  static bool Find(string term, string route)
+        public static bool Find(string term, string route)
         {
             StreamReader str = new StreamReader(route);
             string line = str.ReadLine();
@@ -165,7 +165,7 @@ namespace MoogleEngine
             string[] answer;
             for (int i = 0; i < a.Length; i++)
             {
-                if (a[i] != " " && a[i] != "" && a[i]!=null)
+                if (a[i] != " " && a[i] != "" && a[i] != null)
                 {
                     moment.Add(a[i]);
                 }
@@ -193,50 +193,50 @@ namespace MoogleEngine
         ///<summary>
         ///Metodo margesort para ordenar list<int,string>
         ///</summary> 
-        public static void MargeSortToList(List<(int,string)> list)
+        public static void MargeSortToList(List<(int, string)> list)
         {
-            MargeSortToList(list,0,list.Count-1);
+            MargeSortToList(list, 0, list.Count - 1);
         }
-        public static void MargeSortToList(List<(int,string)> list,int start, int end)
+        public static void MargeSortToList(List<(int, string)> list, int start, int end)
         {
             //condicion de parada
-            if(start==end)return;
+            if (start == end) return;
             //buscando el medio de la lista de elementos
-            int mit=(start+end)/2;
+            int mit = (start + end) / 2;
             //ordenar1ra mitad y luego la segunda
-            MargeSortToList(list,start,mit);
-            MargeSortToList(list,mit+1,end);
-            Marge(list,start,mit,mit+1,end);
+            MargeSortToList(list, start, mit);
+            MargeSortToList(list, mit + 1, end);
+            Marge(list, start, mit, mit + 1, end);
             //copiar los elementos de aux a x
-            list=new List<(int, string)>();          
-            list=CopyListToList(list);
-        } 
+            list = new List<(int, string)>();
+            list = CopyListToList(list);
+        }
         ///<summary>
         ///Metodo auxiliar para el MargeSortToList
         ///</summary> 
-        public static List<(int,string)> Marge(List<(int,string)> list,int start1,int end1,int start2,int end2)
+        public static List<(int, string)> Marge(List<(int, string)> list, int start1, int end1, int start2, int end2)
         {
-            int a=start1;
-            int b=start2;
-            List<(int,string)> answer=new List<(int, string)>();
-            int t=(end1-start1)+(end2-start2);
-            for(int i=0;i<t;i++)
+            int a = start1;
+            int b = start2;
+            List<(int, string)> answer = new List<(int, string)>();
+            int t = (end1 - start1) + (end2 - start2);
+            for (int i = 0; i < t; i++)
             {
-                if(b!=list.Count)
+                if (b != list.Count)
                 {
-                    if(a>end1 && b<=end2)
+                    if (a > end1 && b <= end2)
                     {
                         answer.Add(list[b]);
                         b++;
                     }
-                    if(b>end2 && a<=end1)
+                    if (b > end2 && a <= end1)
                     {
                         answer.Add(list[a]);
                         a++;
                     }
-                          if(b<=end2 && a<=end1)
+                    if (b <= end2 && a <= end1)
                     {
-                        if(list[a].Item1>+list[b].Item1)
+                        if (list[a].Item1 > +list[b].Item1)
                         {
                             answer.Add(list[a]);
                             a++;
@@ -251,7 +251,7 @@ namespace MoogleEngine
                 }
                 else
                 {
-                    if(a<=end1)
+                    if (a <= end1)
                     {
                         answer.Add(list[a]);
                         a++;
@@ -260,145 +260,33 @@ namespace MoogleEngine
             }
             return answer;
         }
-        public  static List<(int,string)> CopyListToList(  List<(int,string)> list)
+        ///<summary>
+        ///Metodo para copiar una lista en otra(empleado para evitar problemas de referencia)
+        ///</summary> 
+        public static List<(int, string)> CopyListToList(List<(int, string)> list)
         {
-            List<(int,string)>answer=new List<(int, string)>();
-            for(int i=0;i<list.Count;i++)
+            List<(int, string)> answer = new List<(int, string)>();
+            for (int i = 0; i < list.Count; i++)
             {
-                answer[i]=list[i];
+                answer[i] = list[i];
             }
             return answer;
-            
-            
+
         }
         ///<summary>
-        ///Metodo margesort para ordenar list<double,string>
+        ///Metodo para copiar una lista de string en una cadena.
         ///</summary> 
-        // public static void MargeSortToListDouble(List<(double,string)> list)
-        // {
-        //     MargeSortToListDouble(list,0,list.Count-1);
-        // }
-        // public static void MargeSortToListDouble(List<(double,string)> list,int start, int end)
-        // {
-        //     //condicion de parada
-        //     if(start==end)return;
-        //     //buscando el medio de la lista de elementos
-        //     int mit=(start+end)/2;
-        //     //ordenar1ra mitad y luego la segunda
-        //     MargeSortToListDouble(list,start,mit);
-        //     MargeSortToListDouble(list,mit+1,end);
-        //     MargeDouble(list,start,mit,mit+1,end);
-        //     //copiar los elementos de aux a x
-        //     list=new List<(double, string)>();          
-        //     list=CopyListToListDouble(list);
-        // } 
-        // public static List<(double,string)> MargeDouble(List<(double,string)> list,int start1,int end1,int start2,int end2)
-        // {
-        //     int a=start1;
-        //     int b=start2;
-        //     List<(double,string)> answer=new List<(double, string)>();
-        //     int t=(end1-start1)+(end2-start2);
-        //     for(int i=0;i<t;i++)
-        //     {
-        //         if(b!=list.Count)
-        //         {
-        //             if(a>end1 && b<=end2)
-        //             {
-        //                 answer.Add(list[b]);
-        //                 b++;
-        //             }
-        //             if(b>end2 && a<=end1)
-        //             {
-        //                 answer.Add(list[a]);
-        //                 a++;
-        //             }
-        //                   if(b<=end2 && a<=end1)
-        //             {
-        //                 if(list[a].Item1>+list[b].Item1)
-        //                 {
-        //                     answer.Add(list[a]);
-        //                     a++;
-        //                 }
-        //                 else
-        //                 {
-        //                     answer.Add(list[b]);
-        //                     b++;
-        //                 }
-        //             }
-
-        //         }
-        //         else
-        //         {
-        //             if(a<=end1)
-        //             {
-        //                 answer.Add(list[a]);
-        //                 a++;
-        //             }
-        //         }
-        //     }
-        //     return answer;
-        // }
-        public  static List<(double,string)> CopyListToListDouble(  List<(double,string)> list)
+        public static string WordListToString(List<string> vect)
         {
-            List<(double,string)>answer=new List<(double, string)>();
-            for(int i=0;i<list.Count;i++)
+            StringBuilder cad = new StringBuilder();
+
+            for (int i = 0; i < vect.Count; i++)
             {
-                answer[i]=list[i];
+                if (i > 0) cad.Append(" ");
+                cad.Append(vect[i]);
             }
-            return answer;
-            
-            
+
+            return cad.ToString();
         }
-
-        
-    public static List<Tuple<string,int>> GetWordsAndPositionsFromString(string cad)
-    {
-        List<Tuple<string,int>> vect = new List<Tuple<string,int>>();
-
-        int last = -1;
-        StringBuilder word = new StringBuilder();
-
-        for(int i = 0 ; i < cad.Length ; i++)
-        {
-            if(Char.IsLetterOrDigit(cad[i]))
-            {
-                if(word.Length == 0)last = i;
-                word.Append(cad[i]);
-            }
-            else
-            {
-                if(word.Length > 0)
-                {
-                    vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
-                    last = -1;
-                    word.Clear();
-                }
-            }
-        }
-
-        if(word.Length > 0)
-        {
-            vect.Add(new Tuple<string,int>(word.ToString().ToLower(), last));
-            last = -1;
-            word.Clear();
-        }
-
-        return vect;
-    }
-
-    
-
-     public static string WordListToString(List<string> vect)
-    {
-        StringBuilder cad = new StringBuilder();
-
-        for(int i = 0 ; i < vect.Count ; i++)
-        {
-            if(i > 0)cad.Append(" ");
-            cad.Append(vect[i]);
-        }
-
-        return cad.ToString();
-    }
     }
 }
