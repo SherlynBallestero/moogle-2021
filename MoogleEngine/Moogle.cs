@@ -36,6 +36,12 @@ public class Moogle
         //guardar diccionary positions
          DictionaryWork.SaveDictionaryPosition(DictionaryForPositions);
 
+        List<double> a= DictionaryForTF["cincuenta"];
+
+        double b = DictionaryForIDF["cincuenta"];
+
+
+
         //******************************
         //recoger diccionario de posiciones
         //esta funcion es una idea de implementacion que puede hacer mas rapida la busca,se propone trabajar en ella,
@@ -64,17 +70,48 @@ public class Moogle
         Symbol symbol = operators.GetSymbol(query, path,DictionaryForPositions);
         //obteniendo array de palabras a partir del query sin operadores y que ademas se encuentre en nuestro conjunto total de palabras
         string[] newQuery = HelperMethods.NullDelet(suggestion.Split());
-        //obtengo los sinonimos de las palabras del query
-        System.Diagnostics.Stopwatch stp=new System.Diagnostics.Stopwatch();
-    
-        newQuery =wordInfo.AddSynonymous(newQuery,synonymous,DictionaryForPositions);
+        //obtengo los sinonimos de las palabras del query    
+        string [] QuerySyn =wordInfo.AddSynonymous(newQuery,synonymous,DictionaryForPositions);
         
         //obteniendo lista con las distancias mas cercanas de las posiciones de las palabras afectadas por el operador"~"
         List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
         //lista de score por nombre de documento ordenados de mayor a menor
-            
+           
         List<(double, string)> scores = score.MV(DistanceInWordsWhithOperator, filesPath, newQuery, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
+       //modelo vectorial en sinonimos
        
+
+        List<(double, string)> scoresSyn = score.MV(DistanceInWordsWhithOperator, filesPath, QuerySyn, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
+        //asignando al score de los sinonimos un valor mas pequeño 
+       //dandole algo de valor a los sinonimos
+        Dictionary<string, double> Doc = new Dictionary<string, double>();
+        foreach(var x in scores)
+        {
+            Doc.Add(x.Item2, x.Item1);
+        }
+
+        foreach(var x in scoresSyn)
+        {
+            if(!Doc.ContainsKey(x.Item2))
+            {
+                Doc.Add(x.Item2, x.Item1 * 0.2);
+            }
+            else
+            {
+                Doc[x.Item2] += x.Item1 * 0.2;
+            }
+        }
+
+        scores = new List<(double, string)>();
+        //agregando a score el valor correspondiente a la busqueda de la consulta mas un pequeño
+        //incremento a partir de buscar los sinonimos correspondientes a las palabras. 
+        foreach(var x in Doc)
+        {
+            scores.Add((x.Value, x.Key));
+        }
+        //ordenar el ranking de mayor a menor
+        scores.Sort((x,y) => y.Item1.CompareTo(x.Item1));
+
         //...snippet...
         //orden en que se debe obtener el snnipet segun el orden dado por el score.
         string[] DocumentsInOrder = new string[scores.Count];
@@ -93,7 +130,7 @@ public class Moogle
         {
             //solo se agregan los documentos con score mayor que cero a los resultados de la busqueda.
             if (scores[i].Item1 > 0){
-                items.Add(new SearchItem(scores[i].Item2 + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1));
+                items.Add(new SearchItem(scores[i].Item2.Substring(path.Length+1) + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1));
             }
         }
         //retornando resultado.

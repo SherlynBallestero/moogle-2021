@@ -61,6 +61,7 @@ namespace MoogleEngine
                 ind++;
                 words[ind]=keys;
             }
+          
 
             for (int i = 0; i < words.Length; i++)
             {
@@ -87,6 +88,7 @@ namespace MoogleEngine
                     }
                    
                 }
+                
                 //obteniendo el vector correspondiente al query
                 if (HelperMethods.FindInArray(queryGuide, words[i]))
                 {
@@ -109,6 +111,7 @@ namespace MoogleEngine
                 vectors[j] = new Vector(auxDouble);
                 auxDouble = HelperMethods.fillWithZeros(auxDouble);
             }
+            
             //obteniendo los coseno de los angulos entre los vectores correspondiente a cada 
             //documento y el vector correspondiente al query
             for (int i = 0; i < vectors.Length; i++)

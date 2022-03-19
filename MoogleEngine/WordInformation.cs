@@ -271,7 +271,7 @@ namespace MoogleEngine
                 //cantidad de docs en que esta
                 int cont = word.Value.Count;
                 //idf es el logaritmo de la cantidad de documentos entre la cantidad de documentos en que se encuentra la palabra
-                wordsIDF.Add(word.Key, Math.Log(file.Length / cont));
+                wordsIDF.Add(word.Key, Math.Log((double)file.Length / (double)cont));
             }
 
             //Llenando TF y Positions
@@ -336,20 +336,20 @@ namespace MoogleEngine
                         synonymousQuery.Add(x);
                         count++;
                     }
-                    if(count==2)break;
+                    if(count==1)break;
                         
                 }
             }
             }
-            foreach(string z in word)
-            {
-                int count=0;
-                while(count<5)
-                {
-                    synonymousQuery.Add(z);
-                    count++;
-                }
-            }
+            // foreach(string z in word)
+            // {
+            //     int count=0;
+            //     while(count<5)
+            //     {
+            //         synonymousQuery.Add(z);
+            //         count++;
+            //     }
+            // }
             return synonymousQuery.ToArray();
 
         }
