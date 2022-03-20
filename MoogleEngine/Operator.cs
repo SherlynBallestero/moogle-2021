@@ -5,6 +5,8 @@ using System.Text;
 
 namespace MoogleEngine
 {
+    //clase para optener la información que se necesita de los operadores que afectan la consulta.
+    //se utiliza para conformar el symbol en `GetSymbol` en operators.cs
     public class Operator
     {
         public HashSet<string> MustExistWords = new HashSet<string>();

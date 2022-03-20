@@ -74,11 +74,11 @@ public class Moogle
         string [] QuerySyn =wordInfo.AddSynonymous(newQuery,synonymous,DictionaryForPositions);
         
         //obteniendo lista con las distancias mas cercanas de las posiciones de las palabras afectadas por el operador"~"
-        List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
+      //  List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
         //lista de score por nombre de documento ordenados de mayor a menor        
-        List<(double, string)> scores = score.MV(DistanceInWordsWhithOperator, filesPath, newQuery, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
+        List<(double, string)> scores = score.MV(filesPath, newQuery, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
        //modelo vectorial en sinonimos
-        List<(double, string)> scoresSyn = score.MV(DistanceInWordsWhithOperator, filesPath, QuerySyn, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
+        List<(double, string)> scoresSyn = score.MV(filesPath, QuerySyn, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
         //asignando al score de los sinonimos un valor mas pequeño 
        //dandole algo de valor a los sinonimos
         Dictionary<string, double> Doc = new Dictionary<string, double>();

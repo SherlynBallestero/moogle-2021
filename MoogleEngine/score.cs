@@ -34,7 +34,7 @@ namespace MoogleEngine
             return idf;
         }
     
-        public static List<(double, string)> MV(List<(int dist, string document)> Closeness,string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route, Dictionary<string, List<double>> DictionaryForTF, Dictionary<string, double> DictionaryForIDF)
+        public static List<(double, string)> MV(string[] file,string[] queryGuide,string query,Symbol symbol, Dictionary<string, List<List<int>>> positions, string route, Dictionary<string, List<double>> DictionaryForTF, Dictionary<string, double> DictionaryForIDF)
         {  
             // System.Diagnostics.Stopwatch ccc = new System.Diagnostics.Stopwatch();
             // ccc.Start();
@@ -152,6 +152,8 @@ namespace MoogleEngine
                    answer.Add((cosin[i], file[i]));
                 }
             }
+            //estructura auxiliar para darle valor as los documentos con las palabras afectadas por el operador ~
+            //se le da mas importancia a los archivos donde estas estan mas cercanas.
 
             Dictionary<string, int> mp = new Dictionary<string, int>();
 
@@ -164,7 +166,8 @@ namespace MoogleEngine
                     foreach(var x in symbol.Closeness)
                     {
                         List<(int, int)> lst = new List<(int, int)>();
-
+                        //se agrega a la lista auxiliar las posiciones de la palabras 1 y 2 de `symbol.Closeness` se les 
+                        //clasifica en p1 y p2 para saber si corresponde a la primera o la segunda palabra
                         foreach(var p1 in positions[x.Item1][i])
                         {
                             if(p1 != -1)lst.Add((p1, 1));
@@ -174,9 +177,11 @@ namespace MoogleEngine
                         {
                             if(p2 != -1)lst.Add((p2, 2));
                         }
-
+                        //se ordena la lista auxiliar 
                         lst.Sort((x,y) => y.Item1.CompareTo(x.Item1));
-
+                        //se itera por posiciones sucesivas verificando que sean de tipos diferentes y quedandonos 
+                        //con distancia inferior a 10, o sea todas las sucesivas con distancia inferior a 10 aumentan un
+                        // contador en el diccionario auxiliar
                         for(int k = 1 ; k < lst.Count ; k++)
                         {
                             if(lst[k].Item2 != lst[k-1].Item2 && Math.Abs(lst[k].Item1 - lst[k-1].Item1) < 10)
@@ -187,7 +192,7 @@ namespace MoogleEngine
                     }
                 }
             }
-
+            //ahora al ranking le asignamos cierto incremento a partir de las palabras cercanas.
             for(int i = 0 ; i < answer.Count ; i++)
             {
                 if(mp.ContainsKey(answer[i].Item2))
