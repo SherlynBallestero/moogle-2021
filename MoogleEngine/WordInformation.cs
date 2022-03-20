@@ -255,7 +255,7 @@ namespace MoogleEngine
                 for (int i = 0; i < text.Length; i++)
                 {
                     //Si no se ha agregado el documento lo agregamos he inicializamos la lista de posiciones para la palabra text[i]
-                    if (WordsAll[text[i]].ContainsKey(f) == false)
+                    if (!WordsAll[text[i]].ContainsKey(f))
                     {
                         WordsAll[text[i]].Add(f, new List<int>());
                     }

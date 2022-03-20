@@ -56,11 +56,11 @@ public class Moogle
     //metodo para devolver los item de la busqueda
     public static SearchResult Query(string query)
     {
-        //primero limpiamos el query o sea le dejamos unicamente letras y numeros y en minusculas
+        //primero limpiamos el query o sea le dejamos unicamente letras en minusculas y numeros
         List<string> lst= WordInformation.GetWordsFromString(query);
         string tempcad = HelperMethods.WordListToString(lst);
 
-        //hallando una sugerencia para el query.
+        //hallando sugerencia para el query.
         Suggestion sgt = new Suggestion(tempcad);
         string suggestion = sgt.suggestionForQuery(DictionaryForPositions);
 
@@ -75,12 +75,9 @@ public class Moogle
         
         //obteniendo lista con las distancias mas cercanas de las posiciones de las palabras afectadas por el operador"~"
         List<(int closeness, string document)> DistanceInWordsWhithOperator = operators.Closeness(symbol, path, DictionaryForPositions);
-        //lista de score por nombre de documento ordenados de mayor a menor
-           
+        //lista de score por nombre de documento ordenados de mayor a menor        
         List<(double, string)> scores = score.MV(DistanceInWordsWhithOperator, filesPath, newQuery, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
        //modelo vectorial en sinonimos
-       
-
         List<(double, string)> scoresSyn = score.MV(DistanceInWordsWhithOperator, filesPath, QuerySyn, suggestion, symbol, DictionaryForPositions, path, DictionaryForTF, DictionaryForIDF);
         //asignando al score de los sinonimos un valor mas pequeño 
        //dandole algo de valor a los sinonimos
@@ -113,7 +110,7 @@ public class Moogle
         scores.Sort((x,y) => y.Item1.CompareTo(x.Item1));
 
         //...snippet...
-        //orden en que se debe obtener el snnipet segun el orden dado por el score.
+        //orden en que se debe obtener el snnipet segun el orden dado por el ranking.
         string[] DocumentsInOrder = new string[scores.Count];
         for (int i = 0; i < scores.Count; i++)
         {
@@ -130,7 +127,7 @@ public class Moogle
         {
             //solo se agregan los documentos con score mayor que cero a los resultados de la busqueda.
             if (scores[i].Item1 > 0){
-                items.Add(new SearchItem(scores[i].Item2.Substring(path.Length+1) + " Score: " + scores[i].Item1, snippet[i], (float)scores[i].Item1));
+                items.Add(new SearchItem(scores[i].Item2.Substring(path.Length+1) , snippet[i], (float)scores[i].Item1));
             }
         }
         //retornando resultado.
