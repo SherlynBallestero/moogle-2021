@@ -1,12 +1,5 @@
-Certainly! Here's the English translation of the provided text:
-
----
 
 # Moogle!
-
-> Project for Programming I. Faculty of Mathematics and Computer Science. University of Havana. Course 2021.
-
->> Sherlyn Ballestero Cruz c113.
 
 ## General Overview
 
