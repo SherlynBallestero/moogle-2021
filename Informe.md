@@ -1,9 +1,7 @@
 # Moogle!
 
 ![](MoogleEdited.jpg)
-> Proyecto de Programación I. Facultad de Matemática y Computación. Universidad de La Habana. Curso 2021.
 
->>Sherlyn Ballestero Cruz c113.
 ## General.
 
 **Un proceso de recuperación de información** comienza cuando un usuario hace una consulta al sistema. Una consulta a su vez es una afirmación formal de la necesidad de una información. En la recuperación de información una consulta no identifica únicamente a un objeto dentro de la colección. De hecho varios objetos pueden ser respuesta a una consulta con diferentes grados de relevancia. La mayoría de los sistemas de recuperación de información computan un ranking para saber cuán bien cada objeto responde a la consulta, ordenando los objetos de acuerdo a su valor de ranking. Los objetos con mayor valor son mostrados a los usuarios y el proceso puede tener otras iteraciones si el usuario desea refinar su consulta.
