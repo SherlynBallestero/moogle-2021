@@ -1,5 +1,6 @@
 
 # Moogle!
+![](MoogleEdited.jpg)
 
 ## General Overview
 
