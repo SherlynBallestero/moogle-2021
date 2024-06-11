@@ -120,29 +120,5 @@ Certainly! Here's the English translation of the provided text:
 
 ---
 
-## Snippet
 
-In the `WordInformation` class, you'll find the functions `snippetForASpecificDocument` and `snippet`:
-
-```cs
-public class WordInformation
-{
-    ...
-
-    public static string snippetForASpecificDocument(string[] files, string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
-    {
-        // Implementation details...
-    }
-
-    public static string[] snippet(string[] query, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string[] files, Symbol symbol)
-    {
-        // Implementation details...
-    }
-}
-```
-
-- **`snippetForASpecificDocument`**:
-  - This function extracts a code snippet of an appropriate size for each document.
-  - When the query contains only one term, it expands around that term to find a suitable segment based on its position in the text and returns it.
-  - Otherwise, it identifies the most relevant word from the query and expands around it.
 
