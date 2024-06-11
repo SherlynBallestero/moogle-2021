@@ -122,3 +122,29 @@ This aspect is addressed in the `suggestion.cs` class. First, the `SimilarityInW
 Synonyms are obtained from `Synonymous.json`, stored in the `DicctionarySyn` folder. Since JSON is a widely used format for data exchange, APIs have been developed for various programming languages to parse, generate, transform, and process JSON data. Using the `System.Text.Json.JsonSerializer` class, we transform the JSON file into a `Dictionary<string, List<string>>`, where each word is associated with its synonyms.
 In the `WordInformation` class, the `AddSynonymous` method constructs `QuerySyn` with at most two synonyms for each word in the user's search query, ensuring that these synonyms exist in the document collection.
 
+## Snippet
+
+In the `WordInformation` class, you'll find the functions `snippetForASpecificDocument` and `snippet`:
+
+```cs
+public class WordInformation
+{
+    ...
+
+    public static string snippetForASpecificDocument(string[] files, string[] queryWords, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string pathToDocument, Symbol symbol)
+    {
+        // Implementation details...
+    }
+
+    public static string[] snippet(string[] query, Dictionary<string, (string[] t1, List<int[]> t2)> dictionary, string[] files, Symbol symbol)
+    {
+        // Implementation details...
+    }
+}
+```
+
+- **`snippetForASpecificDocument`**:
+  - This function extracts a code snippet of an appropriate size for each document.
+  - When the query contains only one term, it expands around that term to find a suitable segment based on its position in the text and returns it.
+  - Otherwise, it identifies the most relevant word from the query and expands around it.
+
